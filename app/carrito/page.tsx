@@ -3,9 +3,11 @@
 import { useCartStore } from '@/store/useCartStore'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { createOrder } from '@/app/actions/orders'
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false)
+  const [orderCompleted, setOrderCompleted] = useState(false)
   const { items, updateQuantity, removeItem, clearCart } = useCartStore()
 
   useEffect(() => {
@@ -23,12 +25,47 @@ export default function CarritoPage() {
   // Calculamos el total dinámicamente
   const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
 
-  const handleFinalizar = () => {
+  const handleFinalizar = async () => {
     console.log("=== DATOS DEL PEDIDO ===")
     console.table(items)
     console.log("Total General:", total)
-    alert("¡Pedido finalizado con éxito! Revisa la consola.")
-    clearCart()
+    
+    // Forzamos un ID de usuario simulado (el action buscará uno válido si no existe)
+    const simulatedUserId = 'usuario-simulado'
+    
+    const result = await createOrder(items, simulatedUserId)
+    
+    if (result.success) {
+      setOrderCompleted(true)
+      clearCart()
+    } else {
+      alert("Error al finalizar el pedido: " + result.error)
+    }
+  }
+
+  if (orderCompleted) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col items-center justify-center">
+        <div className="max-w-lg w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-12 text-center animate-fade-in">
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">¡Gracias por su compra!</h2>
+          <p className="text-slate-600 mb-10 text-lg leading-relaxed">
+            Su pedido ha sido procesado exitosamente. Le hemos enviado los detalles a su correo electrónico.
+          </p>
+          <Link 
+            href="/catalogo" 
+            onClick={() => setOrderCompleted(false)}
+            className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg hover:shadow-blue-600/30 text-lg"
+          >
+            Volver al Catálogo
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
