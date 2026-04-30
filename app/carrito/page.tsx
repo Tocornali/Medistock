@@ -3,12 +3,13 @@
 import { useCartStore } from '@/store/useCartStore'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { createOrder } from '@/app/actions/orders'
+import { useRouter } from 'next/navigation'
+import { formatCurrencyCLP } from '@/lib/utils'
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false)
-  const [orderCompleted, setOrderCompleted] = useState(false)
   const { items, updateQuantity, removeItem, clearCart } = useCartStore()
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
@@ -25,47 +26,8 @@ export default function CarritoPage() {
   // Calculamos el total dinámicamente
   const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
 
-  const handleFinalizar = async () => {
-    console.log("=== DATOS DEL PEDIDO ===")
-    console.table(items)
-    console.log("Total General:", total)
-    
-    // Forzamos un ID de usuario simulado (el action buscará uno válido si no existe)
-    const simulatedUserId = 'usuario-simulado'
-    
-    const result = await createOrder(items, simulatedUserId)
-    
-    if (result.success) {
-      setOrderCompleted(true)
-      clearCart()
-    } else {
-      alert("Error al finalizar el pedido: " + result.error)
-    }
-  }
-
-  if (orderCompleted) {
-    return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col items-center justify-center">
-        <div className="max-w-lg w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-12 text-center animate-fade-in">
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">¡Gracias por su compra!</h2>
-          <p className="text-slate-600 mb-10 text-lg leading-relaxed">
-            Su pedido ha sido procesado exitosamente. Le hemos enviado los detalles a su correo electrónico.
-          </p>
-          <Link 
-            href="/catalogo" 
-            onClick={() => setOrderCompleted(false)}
-            className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg hover:shadow-blue-600/30 text-lg"
-          >
-            Volver al Catálogo
-          </Link>
-        </div>
-      </div>
-    )
+  const handleFinalizar = () => {
+    router.push('/checkout')
   }
 
   return (
@@ -94,7 +56,7 @@ export default function CarritoPage() {
             <div className="flex-1 p-6 md:p-10">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-xl font-bold text-slate-800">Artículos Seleccionados ({items.length})</h2>
-                <button 
+                <button
                   onClick={clearCart}
                   className="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors flex items-center gap-1"
                 >
@@ -110,13 +72,13 @@ export default function CarritoPage() {
                   <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 last:border-0 last:pb-0 gap-4">
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-slate-800 leading-tight mb-1">{item.nombre}</h3>
-                      <p className="text-sm text-slate-500 font-medium">${item.precio.toFixed(2)} c/u</p>
+                      <p className="text-sm text-slate-500 font-medium">{formatCurrencyCLP(item.precio)} c/u</p>
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-8">
                       {/* Controles de cantidad */}
                       <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg h-10">
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.id, item.cantidad - 1)}
                           className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-l-lg transition-colors font-medium"
                         >
@@ -125,7 +87,7 @@ export default function CarritoPage() {
                         <span className="w-12 text-center font-bold text-slate-800">
                           {item.cantidad}
                         </span>
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.id, item.cantidad + 1)}
                           className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-r-lg transition-colors font-medium"
                         >
@@ -136,12 +98,12 @@ export default function CarritoPage() {
                       {/* Subtotal por item */}
                       <div className="w-24 text-right">
                         <p className="font-black text-slate-800 text-lg">
-                          ${(item.precio * item.cantidad).toFixed(2)}
+                          {formatCurrencyCLP(item.precio * item.cantidad)}
                         </p>
                       </div>
-                      
+
                       {/* Eliminar (ahora usamos un botón circular suave) */}
-                      <button 
+                      <button
                         onClick={() => removeItem(item.id)}
                         className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
                         title="Eliminar producto"
@@ -159,25 +121,25 @@ export default function CarritoPage() {
             {/* Resumen Sidebar */}
             <div className="w-full lg:w-[350px] bg-slate-50 p-6 md:p-10 border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col">
               <h2 className="text-xl font-bold text-slate-800 mb-8">Resumen</h2>
-              
+
               <div className="flex justify-between items-center mb-4">
                 <span className="text-slate-500 font-medium">Subtotal</span>
-                <span className="font-bold text-slate-800 text-lg">${total.toFixed(2)}</span>
+                <span className="font-bold text-slate-800 text-lg">{formatCurrencyCLP(total)}</span>
               </div>
               <div className="flex justify-between items-center mb-6">
                 <span className="text-slate-500 font-medium">Impuestos</span>
                 <span className="font-bold text-slate-800 text-lg">Calculado al final</span>
               </div>
-              
+
               <div className="pt-6 border-t border-slate-200 mb-8 flex-1">
                 <div className="flex justify-between items-end">
                   <span className="font-bold text-slate-800 text-lg">Total</span>
-                  <span className="text-4xl font-black text-blue-600">${total.toFixed(2)}</span>
+                  <span className="text-4xl font-black text-blue-600">{formatCurrencyCLP(total)}</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-2 text-right">Los envíos se cotizan posteriormente.</p>
               </div>
 
-              <button 
+              <button
                 onClick={handleFinalizar}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg hover:shadow-blue-600/30 flex justify-center items-center gap-2 text-lg"
               >

@@ -3,12 +3,20 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function createOrder(cartItems: any[], userId: string) {
+export async function createOrder(payload: {
+  cartItems: any[],
+  userId: string,
+  deliveryMethod: string,
+  deliverySpeed: string,
+  address?: string,
+  shippingCost: number,
+  paymentMethod: string
+}) {
   try {
     // Validación de seguridad para asegurarnos de que el usuario existe (o usar uno de fallback)
-    let validUserId = userId;
+    let validUserId = payload.userId;
     const userExists = await prisma.user.findUnique({ where: { id: validUserId } });
-    
+
     if (!userExists) {
       const firstUser = await prisma.user.findFirst();
       if (!firstUser) {
@@ -17,20 +25,32 @@ export async function createOrder(cartItems: any[], userId: string) {
       validUserId = firstUser.id;
     }
 
-    const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+    // Calculamos el subtotal seguro iterando sobre cartItems consultando la BD
+    let subtotal = 0;
+    for (const item of payload.cartItems) {
+      const dbProduct = await prisma.product.findUnique({ where: { id: item.id } });
+      if (!dbProduct) throw new Error(`Producto no encontrado en la base de datos: ${item.id}`);
+      subtotal += dbProduct.precio * item.cantidad;
+    }
+    const secureTotal = subtotal + payload.shippingCost;
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Crear la orden
       const order = await tx.order.create({
         data: {
           userId: validUserId,
-          total: total,
-          estado: 'PENDIENTE',
+          total: secureTotal,
+          estado: 'PENDIENTE_PAGO',
+          deliveryMethod: payload.deliveryMethod,
+          deliverySpeed: payload.deliverySpeed,
+          address: payload.address,
+          shippingCost: payload.shippingCost,
+          paymentMethod: payload.paymentMethod,
         }
       });
 
       // 2. Iterar sobre los items y descontar stock
-      for (const item of cartItems) {
+      for (const item of payload.cartItems) {
         await tx.product.update({
           where: { id: item.id },
           data: {
@@ -46,7 +66,7 @@ export async function createOrder(cartItems: any[], userId: string) {
 
     // 3. Revalidar la página del catálogo para mostrar el stock actualizado
     revalidatePath('/catalogo');
-    
+
     return { success: true, order: result };
   } catch (error) {
     console.error("Error al crear la orden:", error);

@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import AddToCartButton from '@/components/AddToCartButton'
+import Link from 'next/link'
+import { formatCurrencyCLP } from '@/lib/utils'
 
 // Nota: En producción es mejor instanciar PrismaClient en un archivo global (singleton)
 // para evitar múltiples conexiones en desarrollo. Para este MVP, esto funcionará perfecto.
@@ -38,9 +40,11 @@ export default async function CatalogoPage() {
               <div className="p-6 flex-1 flex flex-col">
                 {/* Nombre y SKU */}
                 <div className="mb-4 flex-1">
-                  <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 line-clamp-2">
-                    {product.nombre}
-                  </h3>
+                  <Link href={`/catalogo/${product.id}`} className="hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 line-clamp-2 hover:text-blue-600">
+                      {product.nombre}
+                    </h3>
+                  </Link>
                   <span className="inline-block bg-slate-100 text-slate-500 font-mono text-xs px-2 py-1 rounded-md">
                     SKU: {product.sku}
                   </span>
@@ -51,7 +55,7 @@ export default async function CatalogoPage() {
                   <div>
                     <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Precio</p>
                     <p className="text-2xl font-black text-blue-700">
-                      ${product.precio.toFixed(2)}
+                      {formatCurrencyCLP(product.precio)}
                     </p>
                   </div>
 
@@ -69,7 +73,7 @@ export default async function CatalogoPage() {
                 </div>
 
                 {/* Botón de añadir al carrito */}
-                <AddToCartButton product={{ id: product.id, nombre: product.nombre, precio: product.precio }} />
+                <AddToCartButton product={{ id: product.id, nombre: product.nombre, precio: product.precio, stock_global: product.stock_global }} />
               </div>
             </div>
           ))}
