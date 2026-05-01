@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { webpayTransaction as tx } from '@/lib/transbank'
 
 export async function createOrder(payload: {
   cartItems: any[],
@@ -67,7 +68,22 @@ export async function createOrder(payload: {
     // 3. Revalidar la página del catálogo para mostrar el stock actualizado
     revalidatePath('/catalogo');
 
-    return { success: true, order: result };
+    let transbankResponse;
+    try {
+      // Transbank buyOrder limits to 26 characters max
+      const buyOrder = String(result.id).slice(0, 26);
+      transbankResponse = await tx.create(
+        buyOrder,
+        String(validUserId).replace(/-/g, '').slice(0, 61), // sessionId limit is 61
+        secureTotal,
+        'http://localhost:3000/api/webpay-retorno'
+      );
+    } catch (error) {
+      console.error("Error de Transbank:", error);
+      throw new Error("No se pudo iniciar la transacción con Transbank");
+    }
+
+    return { success: true, order: result, url: transbankResponse.url, token: transbankResponse.token };
   } catch (error) {
     console.error("Error al crear la orden:", error);
     return { success: false, error: "Error al procesar el pedido." };

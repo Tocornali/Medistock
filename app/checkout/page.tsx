@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/useCartStore'
 import { createOrder } from '@/app/actions/orders'
@@ -12,6 +12,9 @@ export default function CheckoutPage() {
   
   const [mounted, setMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
+  
+  const [webpayData, setWebpayData] = useState<{url: string, token: string} | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
   
   const [deliveryMethod, setDeliveryMethod] = useState<'DOMICILIO' | 'RETIRO'>('DOMICILIO')
   const [deliverySpeed, setDeliverySpeed] = useState<'NORMAL' | 'PRIORITARIO'>('NORMAL')
@@ -38,11 +41,17 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    // Redirigir si el carrito está vacío y ya montamos
-    if (mounted && items.length === 0) {
+    if (webpayData && formRef.current) {
+      formRef.current.submit();
+    }
+  }, [webpayData])
+
+  useEffect(() => {
+    // Redirigir si el carrito está vacío y ya montamos (y no estamos redirigiendo a webpay)
+    if (mounted && items.length === 0 && !webpayData) {
       router.push('/carrito')
     }
-  }, [mounted, items.length, router])
+  }, [mounted, items.length, router, webpayData])
 
   // Reset steps if method changes to avoid invalid states
   useEffect(() => {
@@ -53,7 +62,8 @@ export default function CheckoutPage() {
 
   if (!mounted) return null
 
-  if (items.length === 0) {
+  // Si no hay items en el carrito y no estamos redirigiendo a Transbank, ocultamos
+  if (items.length === 0 && !webpayData) {
     return null
   }
 
@@ -116,7 +126,8 @@ export default function CheckoutPage() {
 
       if (result.success) {
         clearCart()
-        router.push('/mis-ordenes')
+        setWebpayData({ url: result.url, token: result.token });
+        // router.push('/mis-ordenes')
       } else {
         alert("Error al procesar la orden: " + result.error)
       }
@@ -126,6 +137,17 @@ export default function CheckoutPage() {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  if (webpayData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-lg font-medium text-slate-700 mb-4">Redirigiendo al portal de pago seguro...</p>
+        <form ref={formRef} action={webpayData.url} method="POST">
+          <input type="hidden" name="token_ws" value={webpayData.token} />
+        </form>
+      </div>
+    );
   }
 
   return (
