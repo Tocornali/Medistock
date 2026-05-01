@@ -11,7 +11,7 @@ export default function CheckoutPage() {
   const { items, clearCart } = useCartStore()
   
   const [mounted, setMounted] = useState(false)
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
   
   const [deliveryMethod, setDeliveryMethod] = useState<'DOMICILIO' | 'RETIRO'>('DOMICILIO')
   const [deliverySpeed, setDeliverySpeed] = useState<'NORMAL' | 'PRIORITARIO'>('NORMAL')
@@ -44,6 +44,13 @@ export default function CheckoutPage() {
     }
   }, [mounted, items.length, router])
 
+  // Reset steps if method changes to avoid invalid states
+  useEffect(() => {
+    if (deliveryMethod === 'RETIRO' && currentStep > 1) {
+      setCurrentStep(1)
+    }
+  }, [deliveryMethod, currentStep])
+
   if (!mounted) return null
 
   if (items.length === 0) {
@@ -61,26 +68,32 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost
 
   const handleNextStep = () => {
-    setCurrentStep(2)
+    if (currentStep < 3) {
+      setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3)
+    }
+  }
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3)
+    }
   }
 
   const handleConfirmOrder = async () => {
-    // Validaciones
-    if (!contactInfo.nombre.trim() || !contactInfo.telefono.trim()) {
-      alert('Por favor ingresa tu nombre y número de teléfono.')
-      return
-    }
-
     let finalAddress = ''
 
     if (deliveryMethod === 'DOMICILIO') {
+      if (!contactInfo.nombre.trim() || !contactInfo.telefono.trim()) {
+        alert('Por favor ingresa tu nombre y número de teléfono.')
+        return
+      }
       if (!addressInfo.ciudad.trim() || !addressInfo.comuna.trim() || !addressInfo.calle.trim() || !addressInfo.numeroCalle.trim()) {
         alert('Por favor completa todos los campos obligatorios de tu dirección.')
         return
       }
       finalAddress = `${addressInfo.calle} ${addressInfo.numeroCalle}${addressInfo.departamento ? `, Depto: ${addressInfo.departamento}` : ''}, ${addressInfo.comuna}, ${addressInfo.ciudad}. Contacto: ${contactInfo.nombre} (${contactInfo.telefono})`
     } else {
-      finalAddress = `Retiro en Tienda. Contacto: ${contactInfo.nombre} (${contactInfo.telefono})`
+      finalAddress = `Retiro en Tienda`
     }
 
     setIsProcessing(true)
@@ -92,7 +105,7 @@ export default function CheckoutPage() {
       cartItems: items,
       userId: simulatedUserId,
       deliveryMethod,
-      deliverySpeed,
+      deliverySpeed: deliveryMethod === 'RETIRO' ? 'NORMAL' : deliverySpeed,
       address: finalAddress,
       shippingCost,
       paymentMethod: 'WEBPAY'
@@ -122,13 +135,24 @@ export default function CheckoutPage() {
         <div className="mb-8 flex items-center justify-center space-x-4">
           <div className="flex items-center">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>1</div>
-            <span className={`ml-2 font-medium ${currentStep >= 1 ? 'text-blue-600' : 'text-slate-500'}`}>Método de Envío</span>
+            <span className={`ml-2 font-medium hidden sm:inline ${currentStep >= 1 ? 'text-blue-600' : 'text-slate-500'}`}>Tipo de Envío</span>
           </div>
-          <div className={`w-16 h-1 rounded ${currentStep >= 2 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
-          <div className="flex items-center">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>2</div>
-            <span className={`ml-2 font-medium ${currentStep >= 2 ? 'text-blue-600' : 'text-slate-500'}`}>Dirección y Contacto</span>
-          </div>
+          
+          {deliveryMethod === 'DOMICILIO' && (
+            <>
+              <div className={`w-8 sm:w-16 h-1 rounded ${currentStep >= 2 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
+              <div className="flex items-center">
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>2</div>
+                <span className={`ml-2 font-medium hidden sm:inline ${currentStep >= 2 ? 'text-blue-600' : 'text-slate-500'}`}>Prioridad de Envío</span>
+              </div>
+              
+              <div className={`w-8 sm:w-16 h-1 rounded ${currentStep >= 3 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
+              <div className="flex items-center">
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold ${currentStep >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>3</div>
+                <span className={`ml-2 font-medium hidden sm:inline ${currentStep >= 3 ? 'text-blue-600' : 'text-slate-500'}`}>Dirección y Contacto</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -138,10 +162,15 @@ export default function CheckoutPage() {
             {currentStep === 1 && (
               <div className="space-y-6 animate-fade-in">
                 {/* Método de Entrega */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                  <h2 className="text-xl font-bold text-slate-800 mb-4">Selecciona el Método de Entrega</h2>
-                  <div className="space-y-3">
-                    <label className={`flex items-center space-x-4 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryMethod === 'DOMICILIO' ? 'border-blue-500 bg-blue-50/50' : 'hover:bg-slate-50 border-slate-200'}`}>
+                <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    Selecciona el Tipo de Envío
+                  </h2>
+                  <div className="space-y-4">
+                    <label className={`flex items-center space-x-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${deliveryMethod === 'DOMICILIO' ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-100' : 'hover:bg-slate-50 border-slate-200'}`}>
                       <input 
                         type="radio" 
                         name="deliveryMethod" 
@@ -151,11 +180,11 @@ export default function CheckoutPage() {
                         className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500"
                       />
                       <div>
-                        <span className="block font-bold text-slate-800">Envío a Domicilio</span>
+                        <span className="block font-bold text-slate-800 text-lg">Envío a Domicilio</span>
                         <span className="block text-sm text-slate-500 mt-1">Recibe tus productos en la comodidad de tu hogar.</span>
                       </div>
                     </label>
-                    <label className={`flex items-center space-x-4 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryMethod === 'RETIRO' ? 'border-blue-500 bg-blue-50/50' : 'hover:bg-slate-50 border-slate-200'}`}>
+                    <label className={`flex items-center space-x-4 p-5 border-2 rounded-2xl cursor-pointer transition-all ${deliveryMethod === 'RETIRO' ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-100' : 'hover:bg-slate-50 border-slate-200'}`}>
                       <input 
                         type="radio" 
                         name="deliveryMethod" 
@@ -165,18 +194,50 @@ export default function CheckoutPage() {
                         className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500"
                       />
                       <div>
-                        <span className="block font-bold text-slate-800">Retiro en Tienda</span>
+                        <span className="block font-bold text-slate-800 text-lg">Retiro en Tienda</span>
                         <span className="block text-sm text-slate-500 mt-1">Retira en nuestra sucursal sin costo adicional.</span>
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {/* Velocidad de Envío */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                  <h2 className="text-xl font-bold text-slate-800 mb-4">Velocidad de Envío</h2>
-                  <div className="space-y-3">
-                    <label className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-colors ${deliverySpeed === 'NORMAL' ? 'border-blue-500 bg-blue-50/50' : 'hover:bg-slate-50 border-slate-200'}`}>
+                <div className="pt-4">
+                  {deliveryMethod === 'DOMICILIO' ? (
+                    <button 
+                      onClick={handleNextStep}
+                      className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg flex justify-center items-center gap-2 text-lg"
+                    >
+                      Siguiente: Prioridad de Envío &rarr;
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleConfirmOrder}
+                      disabled={isProcessing}
+                      className={`w-full font-bold py-4 px-6 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2 text-lg ${
+                        isProcessing 
+                          ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' 
+                          : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-600/30'
+                      }`}
+                    >
+                      {isProcessing ? 'Procesando...' : 'Confirmar Orden'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && deliveryMethod === 'DOMICILIO' && (
+              <div className="space-y-6 animate-fade-in">
+                {/* Prioridad de Envío */}
+                <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Prioridad de Envío
+                  </h2>
+                  <div className="space-y-4">
+                    <label className={`flex items-center justify-between p-5 border-2 rounded-2xl cursor-pointer transition-all ${deliverySpeed === 'NORMAL' ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-100' : 'hover:bg-slate-50 border-slate-200'}`}>
                       <div className="flex items-center space-x-4">
                         <input 
                           type="radio" 
@@ -187,12 +248,13 @@ export default function CheckoutPage() {
                           className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500"
                         />
                         <div>
-                          <span className="block font-bold text-slate-800">Normal (3-5 días hábiles)</span>
+                          <span className="block font-bold text-slate-800 text-lg">Normal</span>
+                          <span className="block text-sm text-slate-500 mt-1">3-5 días hábiles</span>
                         </div>
                       </div>
                       <span className="text-slate-500 font-bold">Gratis</span>
                     </label>
-                    <label className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-colors ${deliverySpeed === 'PRIORITARIO' ? 'border-blue-500 bg-blue-50/50' : 'hover:bg-slate-50 border-slate-200'}`}>
+                    <label className={`flex items-center justify-between p-5 border-2 rounded-2xl cursor-pointer transition-all ${deliverySpeed === 'PRIORITARIO' ? 'border-blue-500 bg-blue-50/50 shadow-md shadow-blue-100' : 'hover:bg-slate-50 border-slate-200'}`}>
                       <div className="flex items-center space-x-4">
                         <input 
                           type="radio" 
@@ -203,26 +265,33 @@ export default function CheckoutPage() {
                           className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500"
                         />
                         <div>
-                          <span className="block font-bold text-slate-800">Prioritario (24 hrs)</span>
+                          <span className="block font-bold text-slate-800 text-lg">Prioritario</span>
+                          <span className="block text-sm text-slate-500 mt-1">En 24 horas</span>
                         </div>
                       </div>
-                      <span className="text-slate-500 font-bold">{deliveryMethod === 'DOMICILIO' ? '+$5000' : 'No aplica'}</span>
+                      <span className="text-slate-500 font-bold">+$5000</span>
                     </label>
                   </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    onClick={handlePrevStep}
+                    className="w-1/3 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-4 px-6 rounded-xl transition-colors"
+                  >
+                    &larr; Volver
+                  </button>
                   <button 
                     onClick={handleNextStep}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg flex justify-center items-center gap-2 text-lg"
+                    className="w-2/3 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg flex justify-center items-center gap-2 text-lg"
                   >
-                    Siguiente: Dirección y Contacto &rarr;
+                    Siguiente: Dirección &rarr;
                   </button>
                 </div>
               </div>
             )}
 
-            {currentStep === 2 && (
+            {currentStep === 3 && deliveryMethod === 'DOMICILIO' && (
               <div className="space-y-6 animate-fade-in">
                 {/* Datos de Contacto */}
                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
@@ -257,78 +326,76 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Formulario de Dirección Detallado */}
-                {deliveryMethod === 'DOMICILIO' && (
-                  <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Dirección de Envío
-                    </h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad *</label>
-                        <input 
-                          type="text" 
-                          value={addressInfo.ciudad}
-                          onChange={(e) => setAddressInfo({...addressInfo, ciudad: e.target.value})}
-                          placeholder="Ej: Santiago"
-                          className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Comuna *</label>
-                        <input 
-                          type="text" 
-                          value={addressInfo.comuna}
-                          onChange={(e) => setAddressInfo({...addressInfo, comuna: e.target.value})}
-                          placeholder="Ej: Providencia"
-                          className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
-                      <div className="md:col-span-8">
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Calle *</label>
-                        <input 
-                          type="text" 
-                          value={addressInfo.calle}
-                          onChange={(e) => setAddressInfo({...addressInfo, calle: e.target.value})}
-                          placeholder="Ej: Av. Nueva Providencia"
-                          className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        />
-                      </div>
-                      <div className="md:col-span-4">
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Número *</label>
-                        <input 
-                          type="text" 
-                          value={addressInfo.numeroCalle}
-                          onChange={(e) => setAddressInfo({...addressInfo, numeroCalle: e.target.value})}
-                          placeholder="Ej: 1234"
-                          className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
-                        />
-                      </div>
-                    </div>
-
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                  <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Dirección de Envío
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">Departamento / Oficina (Opcional)</label>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Ciudad *</label>
                       <input 
                         type="text" 
-                        value={addressInfo.departamento}
-                        onChange={(e) => setAddressInfo({...addressInfo, departamento: e.target.value})}
-                        placeholder="Ej: Depto 502, Torre B"
+                        value={addressInfo.ciudad}
+                        onChange={(e) => setAddressInfo({...addressInfo, ciudad: e.target.value})}
+                        placeholder="Ej: Santiago"
+                        className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Comuna *</label>
+                      <input 
+                        type="text" 
+                        value={addressInfo.comuna}
+                        onChange={(e) => setAddressInfo({...addressInfo, comuna: e.target.value})}
+                        placeholder="Ej: Providencia"
                         className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                       />
                     </div>
                   </div>
-                )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+                    <div className="md:col-span-8">
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Calle *</label>
+                      <input 
+                        type="text" 
+                        value={addressInfo.calle}
+                        onChange={(e) => setAddressInfo({...addressInfo, calle: e.target.value})}
+                        placeholder="Ej: Av. Nueva Providencia"
+                        className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      />
+                    </div>
+                    <div className="md:col-span-4">
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">Número *</label>
+                      <input 
+                        type="text" 
+                        value={addressInfo.numeroCalle}
+                        onChange={(e) => setAddressInfo({...addressInfo, numeroCalle: e.target.value})}
+                        placeholder="Ej: 1234"
+                        className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Departamento / Oficina (Opcional)</label>
+                    <input 
+                      type="text" 
+                      value={addressInfo.departamento}
+                      onChange={(e) => setAddressInfo({...addressInfo, departamento: e.target.value})}
+                      placeholder="Ej: Depto 502, Torre B"
+                      className="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                    />
+                  </div>
+                </div>
 
                 <div className="flex gap-4 pt-4">
                   <button 
-                    onClick={() => setCurrentStep(1)}
+                    onClick={handlePrevStep}
                     className="w-1/3 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-4 px-6 rounded-xl transition-colors"
                   >
                     &larr; Volver
