@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CopyIdButton from '@/components/CopyIdButton'
+import ClearCart from '@/components/ClearCart'
 
 export default async function CheckoutExitoPage({
   searchParams
@@ -36,6 +37,7 @@ export default async function CheckoutExitoPage({
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      {order.estado === 'PAGADO' && <ClearCart />}
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
         
         {/* Encabezado Verde */}
@@ -83,14 +85,12 @@ export default async function CheckoutExitoPage({
           <div className="mb-6 px-2">
             <h3 className="text-slate-800 font-bold mb-3 text-sm uppercase tracking-wide">Detalle de la compra</h3>
             <div className="space-y-3 mb-4">
-              {/* @ts-ignore - Pendiente de implementar OrderItem en Prisma */}
-              {((order as any).orderItems || []).length > 0 ? (
-                /* @ts-ignore */
-                (order as any).orderItems.map((item: any, i: number) => (
+              {Array.isArray((order as any).cartItems) && ((order as any).cartItems).length > 0 ? (
+                ((order as any).cartItems).map((item: any, i: number) => (
                   <div key={i} className="flex justify-between text-sm">
                     <span className="text-slate-600">
                       <span className="font-bold mr-2">{item.cantidad}x</span> 
-                      {item.product?.nombre || 'Producto'}
+                      {item.nombre || item.product?.nombre || 'Producto'}
                     </span>
                     <span className="text-slate-800 font-medium">
                       {Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format((item.precio || 0) * item.cantidad)}
@@ -99,7 +99,7 @@ export default async function CheckoutExitoPage({
                 ))
               ) : (
                 <div className="text-xs text-slate-400 italic">
-                  (El detalle de productos requiere actualizar el esquema de base de datos)
+                  (Sin detalle de productos)
                 </div>
               )}
             </div>

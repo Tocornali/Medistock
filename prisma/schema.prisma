@@ -84,6 +84,7 @@ model Order {
   address        String?
   shippingCost   Float?
   paymentMethod  String?
+  cartItems      Json?
   
   user           User    @relation(fields: [userId], references: [id])
 }

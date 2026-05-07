@@ -125,7 +125,6 @@ export default function CheckoutPage() {
       const result = await createOrder(payload)
 
       if (result.success) {
-        clearCart()
         setWebpayData({ url: result.url, token: result.token });
         // router.push('/mis-ordenes')
       } else {

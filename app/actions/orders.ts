@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { webpayTransaction as tx } from '@/lib/transbank'
+import { getBaseUrl } from '@/lib/utils'
 
 export async function createOrder(payload: {
   cartItems: any[],
@@ -31,6 +32,9 @@ export async function createOrder(payload: {
     for (const item of payload.cartItems) {
       const dbProduct = await prisma.product.findUnique({ where: { id: item.id } });
       if (!dbProduct) throw new Error(`Producto no encontrado en la base de datos: ${item.id}`);
+      if (dbProduct.stock_global < item.cantidad) {
+        throw new Error(`No hay stock suficiente para el producto: ${dbProduct.nombre}`);
+      }
       subtotal += dbProduct.precio * item.cantidad;
     }
     const secureTotal = subtotal + payload.shippingCost;
@@ -47,20 +51,9 @@ export async function createOrder(payload: {
           address: payload.address,
           shippingCost: payload.shippingCost,
           paymentMethod: payload.paymentMethod,
+          cartItems: payload.cartItems, // Guardamos los items para procesarlos en el retorno
         }
       });
-
-      // 2. Iterar sobre los items y descontar stock
-      for (const item of payload.cartItems) {
-        await tx.product.update({
-          where: { id: item.id },
-          data: {
-            stock_global: {
-              decrement: item.cantidad
-            }
-          }
-        });
-      }
 
       return order;
     });
@@ -76,7 +69,7 @@ export async function createOrder(payload: {
         buyOrder,
         String(validUserId).replace(/-/g, '').slice(0, 61), // sessionId limit is 61
         secureTotal,
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/webpay-retorno`
+        `${getBaseUrl()}/api/webpay-retorno`
       );
     } catch (error) {
       console.error("Error de Transbank:", error);
