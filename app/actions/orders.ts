@@ -76,7 +76,7 @@ export async function createOrder(payload: {
         buyOrder,
         String(validUserId).replace(/-/g, '').slice(0, 61), // sessionId limit is 61
         secureTotal,
-        'http://localhost:3000/api/webpay-retorno'
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/webpay-retorno`
       );
     } catch (error) {
       console.error("Error de Transbank:", error);
