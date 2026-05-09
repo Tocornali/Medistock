@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import AddToCartButton from '@/components/AddToCartButton'
 import { formatCurrencyCLP } from '@/lib/utils'
+import { auth } from '@/auth'
+import { calculatePrice } from '@/lib/prices'
 
 const prisma = new PrismaClient()
 
@@ -23,6 +25,11 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound()
   }
+
+  const session = await auth()
+  const user = session?.user as any
+  const finalPrice = calculatePrice(product, user)
+  const isCompany = user?.role === 'COMPANY'
 
   // 3. Renderizamos la vista de producto
   return (
@@ -63,10 +70,15 @@ export default async function ProductDetailPage({
                 {product.nombre}
               </h1>
 
-              <div className="mb-8">
+              <div className="mb-8 flex flex-col items-start">
                 <p className="text-4xl font-black text-blue-600">
-                  {formatCurrencyCLP(product.precio)}
+                  {formatCurrencyCLP(finalPrice)}
                 </p>
+                {isCompany && (
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full inline-block mt-2">
+                    Precio Mayorista
+                  </span>
+                )}
                 <p className="text-sm text-slate-500 mt-2">Precio neto. Impuestos calculados en el checkout.</p>
               </div>
 
@@ -95,7 +107,7 @@ export default async function ProductDetailPage({
                   product={{ 
                     id: product.id, 
                     nombre: product.nombre, 
-                    precio: product.precio,
+                    precio: finalPrice,
                     stock_global: product.stock_global 
                   }} 
                 />

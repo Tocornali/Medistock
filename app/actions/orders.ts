@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { webpayTransaction as tx } from '@/lib/transbank'
 import { getBaseUrl } from '@/lib/utils'
+import { auth } from '@/auth'
+import { calculatePrice } from '@/lib/prices'
 
 export async function createOrder(payload: {
   cartItems: any[],
@@ -15,16 +17,14 @@ export async function createOrder(payload: {
   paymentMethod: string
 }) {
   try {
-    // Validación de seguridad para asegurarnos de que el usuario existe (o usar uno de fallback)
-    let validUserId = payload.userId;
+    // Obtenemos el usuario directamente de la sesión de Auth.js
+    const session = await auth()
+    
+    let validUserId = session?.user?.id || payload.userId;
     const userExists = await prisma.user.findUnique({ where: { id: validUserId } });
 
     if (!userExists) {
-      const firstUser = await prisma.user.findFirst();
-      if (!firstUser) {
-        throw new Error("No hay usuarios en la base de datos para asignar la orden.");
-      }
-      validUserId = firstUser.id;
+      throw new Error("No se pudo identificar al usuario para procesar la orden.");
     }
 
     // Calculamos el subtotal seguro iterando sobre cartItems consultando la BD
@@ -35,7 +35,8 @@ export async function createOrder(payload: {
       if (dbProduct.stock_global < item.cantidad) {
         throw new Error(`No hay stock suficiente para el producto: ${dbProduct.nombre}`);
       }
-      subtotal += dbProduct.precio * item.cantidad;
+      const finalPrice = calculatePrice(dbProduct, userExists);
+      subtotal += finalPrice * item.cantidad;
     }
     const secureTotal = subtotal + payload.shippingCost;
 

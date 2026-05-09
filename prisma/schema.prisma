@@ -8,6 +8,8 @@ datasource db {
 }
 
 enum Role {
+  USER
+  COMPANY
   ADMIN
   EJECUTIVO
   LOGISTICA
@@ -24,7 +26,11 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  role          Role      @default(CLIENTE_B2C)
+  role          Role      @default(USER)
+  rutEmpresa    String?   @unique
+  razonSocial   String?
+  giro          String?
+  direccionFact String?
   orders        Order[]
   accounts      Account[]
   sessions      Session[]
@@ -70,6 +76,7 @@ model Product {
   sku          String  @unique
   nombre       String
   precio       Float
+  companyPrice Float?
   stock_global Int
 }
 

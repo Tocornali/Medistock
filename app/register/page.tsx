@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [pending, setPending] = useState(false)
   const [capsLockActive, setCapsLockActive] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [accountType, setAccountType] = useState<"PERSONA" | "EMPRESA">("PERSONA")
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setCapsLockActive(e.getModifierState('CapsLock'))
@@ -50,6 +51,33 @@ export default function RegisterPage() {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <input type="hidden" name="accountType" value={accountType} />
+          
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button
+              type="button"
+              onClick={() => setAccountType("PERSONA")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                accountType === "PERSONA" 
+                  ? "bg-white text-slate-900 shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Persona
+            </button>
+            <button
+              type="button"
+              onClick={() => setAccountType("EMPRESA")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                accountType === "EMPRESA" 
+                  ? "bg-white text-slate-900 shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Empresa
+            </button>
+          </div>
+
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
@@ -124,6 +152,51 @@ export default function RegisterPage() {
                 )}
               </div>
             </div>
+
+            {accountType === "EMPRESA" && (
+              <div className="space-y-4 pt-4 border-t border-slate-200">
+                <h3 className="text-sm font-medium text-slate-900">Datos de la Empresa</h3>
+                <div>
+                  <label htmlFor="rutEmpresa" className="block text-sm font-medium text-slate-700 mb-1">
+                    RUT Empresa
+                  </label>
+                  <input
+                    id="rutEmpresa"
+                    name="rutEmpresa"
+                    type="text"
+                    required={accountType === "EMPRESA"}
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    placeholder="76.123.456-7"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="razonSocial" className="block text-sm font-medium text-slate-700 mb-1">
+                    Razón Social
+                  </label>
+                  <input
+                    id="razonSocial"
+                    name="razonSocial"
+                    type="text"
+                    required={accountType === "EMPRESA"}
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    placeholder="Mi Empresa SpA"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="giro" className="block text-sm font-medium text-slate-700 mb-1">
+                    Giro
+                  </label>
+                  <input
+                    id="giro"
+                    name="giro"
+                    type="text"
+                    required={accountType === "EMPRESA"}
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    placeholder="Venta al por mayor de..."
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {error && (

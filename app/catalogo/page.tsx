@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import AddToCartButton from '@/components/AddToCartButton'
 import Link from 'next/link'
 import { formatCurrencyCLP } from '@/lib/utils'
+import { auth } from '@/auth'
+import { calculatePrice } from '@/lib/prices'
 
 // Nota: En producción es mejor instanciar PrismaClient en un archivo global (singleton)
 // para evitar múltiples conexiones en desarrollo. Para este MVP, esto funcionará perfecto.
@@ -15,6 +17,9 @@ export default async function CatalogoPage() {
       nombre: 'asc', // Ordenados alfabéticamente
     },
   })
+  
+  const session = await auth()
+  const user = session?.user as any
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -32,12 +37,16 @@ export default async function CatalogoPage() {
 
         {/* Cuadrícula de Tarjetas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
-            >
-              <div className="p-6 flex-1 flex flex-col">
+          {products.map((product) => {
+            const finalPrice = calculatePrice(product, user)
+            const isCompany = user?.role === 'COMPANY'
+
+            return (
+              <div
+                key={product.id}
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+              >
+                <div className="p-6 flex-1 flex flex-col">
                 {/* Nombre y SKU */}
                 <div className="mb-4 flex-1">
                   <Link href={`/catalogo/${product.id}`} className="hover:text-blue-600 transition-colors">
@@ -54,9 +63,16 @@ export default async function CatalogoPage() {
                 <div className="pt-4 border-t border-slate-100 flex items-end justify-between mt-auto">
                   <div>
                     <p className="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Precio</p>
-                    <p className="text-2xl font-black text-blue-700">
-                      {formatCurrencyCLP(product.precio)}
-                    </p>
+                    <div className="flex flex-col">
+                      <p className="text-2xl font-black text-blue-700">
+                        {formatCurrencyCLP(finalPrice)}
+                      </p>
+                      {isCompany && (
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1 self-start">
+                          Precio Mayorista
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="text-right">
@@ -73,10 +89,11 @@ export default async function CatalogoPage() {
                 </div>
 
                 {/* Botón de añadir al carrito */}
-                <AddToCartButton product={{ id: product.id, nombre: product.nombre, precio: product.precio, stock_global: product.stock_global }} />
+                <AddToCartButton product={{ id: product.id, nombre: product.nombre, precio: finalPrice, stock_global: product.stock_global }} />
               </div>
             </div>
-          ))}
+            )
+          })}
 
           {/* Estado vacío en caso de que no haya productos */}
           {products.length === 0 && (
