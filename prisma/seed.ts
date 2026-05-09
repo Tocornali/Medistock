@@ -1,4 +1,5 @@
 import { PrismaClient, Role } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -7,10 +8,14 @@ async function main() {
 
   // 1. Crear 1 usuario de prueba
   const user = await prisma.user.upsert({
-    where: { email: 'admin@medistock.com' },
+    where: { rut: '1-9' },
     update: {},
     create: {
+      rut: '1-9',
       email: 'admin@medistock.com',
+      name: 'Admin',
+      password: await bcrypt.hash('admin123', 10),
+      isActive: true,
       role: Role.ADMIN,
     },
   })

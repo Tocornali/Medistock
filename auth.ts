@@ -11,17 +11,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email o RUT", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.identifier || !credentials?.password) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string }
+        const identifier = credentials.identifier as string;
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: identifier },
+              { rut: identifier }
+            ]
+          }
         });
+
+        if (user && !user.isActive) {
+          throw new Error("INACTIVE_ACCOUNT:" + user.rut);
+        }
 
         if (!user || !user.password) {
           return null;

@@ -11,12 +11,9 @@ enum Role {
   USER
   COMPANY
   ADMIN
-  EJECUTIVO
-  LOGISTICA
-  FINANZAS
-  CLIENTE_B2C
-  CLIENTE_B2B
-  OPERADOR
+  LOGISTICS
+  SALES
+  FINANCE
 }
 
 model User {
@@ -27,7 +24,8 @@ model User {
   image         String?
   password      String?
   role          Role      @default(USER)
-  rutEmpresa    String?   @unique
+  isActive      Boolean   @default(false)
+  rut           String    @unique
   razonSocial   String?
   giro          String?
   direccionFact String?

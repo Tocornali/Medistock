@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { checkAccountStatus } from "@/app/actions/login"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [capsLockActive, setCapsLockActive] = useState(false)
@@ -21,8 +22,14 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
+    const status = await checkAccountStatus(identifier)
+    if (status.exists && !status.isActive) {
+      router.push(`/auth/activate/${status.rut}`)
+      return
+    }
+
     const result = await signIn("credentials", {
-      email,
+      identifier,
       password,
       redirect: false,
     })
@@ -30,7 +37,16 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Credenciales inválidas")
     } else {
-      router.push("/")
+      const session = await getSession()
+      const role = (session?.user as any)?.role
+      
+      if (role === 'LOGISTICS') {
+        router.push("/dashboard/inventory")
+      } else if (role === 'ADMIN' || role === 'FINANCE') {
+        router.push("/dashboard/admin")
+      } else {
+        router.push("/")
+      }
       router.refresh()
     }
   }
@@ -49,19 +65,19 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Correo Electrónico
+              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
+                Correo Electrónico o RUT
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
                 required
                 className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="correo@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ejemplo@correo.com o 12345678-9"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div>
