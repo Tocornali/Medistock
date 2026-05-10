@@ -35,7 +35,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
           ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' 
           : isAdded 
             ? 'bg-emerald-600 hover:bg-emerald-700' 
-            : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-600/30'
+            : 'bg-brand-primary hover:bg-[#1A9089] hover:shadow-brand-primary/30'
       }`}
     >
       {isOutOfStock ? (

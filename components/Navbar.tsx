@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
 import LogoutButton from './LogoutButton'
+import { ThemeToggle } from './ThemeToggle'
 
 export default async function Navbar() {
   const session = await auth()
@@ -18,21 +19,22 @@ export default async function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 w-full bg-white border-b border-slate-200 z-40 shadow-sm h-16">
+    <nav className="fixed top-0 w-full bg-white dark:bg-brand-dark border-b border-slate-200 dark:border-white/10 z-40 shadow-sm h-16 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-blue-600 tracking-tight">
+        <Link href="/" className="text-2xl font-bold text-brand-primary tracking-tight">
           MEDISTOCK
         </Link>
         <div className="flex items-center space-x-6 pr-16"> {/* pr-16 deja espacio para el CartIndicator */}
-          <Link href="/catalogo" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">
+          <Link href="/catalogo" className="text-slate-600 dark:text-slate-300 hover:text-brand-primary font-medium transition-colors">
             Catálogo
           </Link>
           
           {session?.user ? (
-            <div className="flex items-center gap-4 border-l pl-6 border-slate-200">
+            <div className="flex items-center gap-4 border-l pl-6 border-slate-200 dark:border-white/10">
+              <ThemeToggle />
               <Link 
                 href={profileUrl}
-                className="text-sm text-slate-700 font-medium hover:text-blue-600 transition-colors"
+                className="text-sm text-slate-700 dark:text-slate-300 font-medium hover:text-brand-primary transition-colors"
                 title="Ir a mi panel"
               >
                 {session.user.name || session.user.email || 'Mi Cuenta'}
@@ -40,8 +42,9 @@ export default async function Navbar() {
               <LogoutButton />
             </div>
           ) : (
-            <div className="border-l pl-6 border-slate-200">
-              <Link href="/login" className="text-sm font-medium bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors shadow-sm">
+            <div className="border-l pl-6 border-slate-200 dark:border-white/10 flex items-center gap-4">
+              <ThemeToggle />
+              <Link href="/login" className="text-sm font-medium bg-brand-primary text-white px-5 py-2 rounded-md hover:bg-[#1A9089] transition-colors shadow-sm">
                 Iniciar Sesión
               </Link>
             </div>

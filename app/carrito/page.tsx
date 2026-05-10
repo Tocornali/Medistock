@@ -17,8 +17,8 @@ export default function CarritoPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-slate-50 py-12 flex justify-center items-center">
-        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-slate-50 dark:bg-brand-dark transition-colors py-12 flex justify-center items-center">
+        <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
@@ -31,31 +31,31 @@ export default function CarritoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark transition-colors py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tu Carrito de Compras</h1>
-          <Link href="/catalogo" className="text-blue-600 font-medium hover:text-blue-800 transition-colors">
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white transition-colors tracking-tight">Tu Carrito de Compras</h1>
+          <Link href="/catalogo" className="text-brand-primary font-medium hover:text-blue-800 transition-colors">
             &larr; Seguir comprando
           </Link>
         </header>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-16 text-center">
+          <div className="bg-white dark:bg-[#242729] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm p-16 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mx-auto text-slate-300 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <p className="text-2xl font-medium text-slate-700 mb-8">Tu carrito está completamente vacío</p>
-            <Link href="/catalogo" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md">
+            <p className="text-2xl font-medium text-slate-700 dark:text-slate-300 transition-colors mb-8">Tu carrito está completamente vacío</p>
+            <Link href="/catalogo" className="inline-block bg-brand-primary hover:bg-[#1A9089] text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-md">
               Explorar el catálogo
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden flex flex-col lg:flex-row">
+          <div className="bg-white dark:bg-[#242729] rounded-3xl border border-slate-200 dark:border-white/10 shadow-md overflow-hidden flex flex-col lg:flex-row">
             {/* Lista de productos */}
             <div className="flex-1 p-6 md:p-10">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-bold text-slate-800">Artículos Seleccionados ({items.length})</h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white transition-colors">Artículos Seleccionados ({items.length})</h2>
                 <button
                   onClick={clearCart}
                   className="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors flex items-center gap-1"
@@ -69,27 +69,27 @@ export default function CarritoPage() {
 
               <div className="space-y-6">
                 {items.map((item) => (
-                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 last:border-0 last:pb-0 gap-4">
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 dark:border-white/10 last:border-0 last:pb-0 gap-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-slate-800 leading-tight mb-1">{item.nombre}</h3>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-white transition-colors leading-tight mb-1">{item.nombre}</h3>
                       <p className="text-sm text-slate-500 font-medium">{formatCurrencyCLP(item.precio)} c/u</p>
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-8">
                       {/* Controles de cantidad */}
-                      <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg h-10">
+                      <div className="flex items-center bg-slate-50 dark:bg-brand-dark transition-colors border border-slate-200 dark:border-white/10 rounded-lg h-10">
                         <button
                           onClick={() => updateQuantity(item.id, item.cantidad - 1)}
-                          className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-l-lg transition-colors font-medium"
+                          className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-brand-primary hover:bg-slate-100 rounded-l-lg transition-colors font-medium"
                         >
                           -
                         </button>
-                        <span className="w-12 text-center font-bold text-slate-800">
+                        <span className="w-12 text-center font-bold text-slate-800 dark:text-white transition-colors">
                           {item.cantidad}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.cantidad + 1)}
-                          className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-r-lg transition-colors font-medium"
+                          className="w-10 h-full flex items-center justify-center text-slate-500 hover:text-brand-primary hover:bg-slate-100 rounded-r-lg transition-colors font-medium"
                         >
                           +
                         </button>
@@ -97,7 +97,7 @@ export default function CarritoPage() {
 
                       {/* Subtotal por item */}
                       <div className="w-24 text-right">
-                        <p className="font-black text-slate-800 text-lg">
+                        <p className="font-black text-slate-800 dark:text-white transition-colors text-lg">
                           {formatCurrencyCLP(item.precio * item.cantidad)}
                         </p>
                       </div>
@@ -119,29 +119,29 @@ export default function CarritoPage() {
             </div>
 
             {/* Resumen Sidebar */}
-            <div className="w-full lg:w-[350px] bg-slate-50 p-6 md:p-10 border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col">
-              <h2 className="text-xl font-bold text-slate-800 mb-8">Resumen</h2>
+            <div className="w-full lg:w-[350px] bg-slate-50 dark:bg-brand-dark transition-colors p-6 md:p-10 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/10 flex flex-col">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white transition-colors mb-8">Resumen</h2>
 
               <div className="flex justify-between items-center mb-4">
                 <span className="text-slate-500 font-medium">Subtotal</span>
-                <span className="font-bold text-slate-800 text-lg">{formatCurrencyCLP(total)}</span>
+                <span className="font-bold text-slate-800 dark:text-white transition-colors text-lg">{formatCurrencyCLP(total)}</span>
               </div>
               <div className="flex justify-between items-center mb-6">
                 <span className="text-slate-500 font-medium">Impuestos</span>
-                <span className="font-bold text-slate-800 text-lg">Calculado al final</span>
+                <span className="font-bold text-slate-800 dark:text-white transition-colors text-lg">Calculado al final</span>
               </div>
 
-              <div className="pt-6 border-t border-slate-200 mb-8 flex-1">
+              <div className="pt-6 border-t border-slate-200 dark:border-white/10 mb-8 flex-1">
                 <div className="flex justify-between items-end">
-                  <span className="font-bold text-slate-800 text-lg">Total</span>
-                  <span className="text-4xl font-black text-blue-600">{formatCurrencyCLP(total)}</span>
+                  <span className="font-bold text-slate-800 dark:text-white transition-colors text-lg">Total</span>
+                  <span className="text-4xl font-black text-brand-primary">{formatCurrencyCLP(total)}</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-2 text-right">Los envíos se cotizan posteriormente.</p>
               </div>
 
               <button
                 onClick={handleFinalizar}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg hover:shadow-blue-600/30 flex justify-center items-center gap-2 text-lg"
+                className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-bold py-4 px-6 rounded-xl transition-colors shadow-lg hover:shadow-brand-primary/30 flex justify-center items-center gap-2 text-lg"
               >
                 Finalizar Pedido
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">

@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [pending, setPending] = useState(false)
   const [capsLockActive, setCapsLockActive] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -21,10 +22,12 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setPending(true)
 
     const status = await checkAccountStatus(email)
     if (status.exists && !status.isActive && status.rut) {
       router.push(`/auth/activate/${status.rut}`)
+      setPending(false)
       return
     }
 
@@ -41,6 +44,7 @@ export default function LoginPage() {
       } else {
         setError("Credenciales inválidas")
       }
+      setPending(false)
     } else {
       const session = await getSession()
       const role = (session?.user as any)?.role
@@ -57,36 +61,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-brand-dark px-4 py-12 sm:px-6 lg:px-8 transition-colors">
+      <div className="w-full max-w-md space-y-8 bg-white dark:bg-[#242729] p-8 rounded-xl shadow-lg border border-transparent dark:border-white/10 transition-colors">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white transition-colors">
             Iniciar Sesión
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-slate-400 transition-colors">
             Accede a tu cuenta de Medistock
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">
                 Correo Electrónico
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="ejemplo@correo.com"
+                className="mt-1 block w-full appearance-none rounded-md border border-gray-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-4 py-3 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm transition-colors"
+                placeholder="tu@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">
                 Contraseña
               </label>
               <div className="relative">
@@ -96,7 +99,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pr-20 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full appearance-none rounded-md border border-gray-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-4 py-3 pr-20 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm transition-colors"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -125,7 +128,7 @@ export default function LoginPage() {
                     className="absolute inset-y-0 right-10 flex items-center pointer-events-none"
                     title="Bloq Mayús está activado"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-primary/80 dark:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                   </div>
@@ -143,21 +146,22 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              disabled={pending}
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-brand-primary px-4 py-3 text-sm font-bold text-white hover:bg-[#1A9089] focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 transition-all disabled:opacity-50"
             >
-              Entrar
+              {pending ? 'Iniciando Sesión...' : 'Entrar'}
             </button>
           </div>
-          
-          <div className="text-center mt-4 pt-4 border-t border-slate-100 flex flex-col space-y-3">
+
+          <div className="text-center mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex flex-col space-y-3 transition-colors">
             <div>
-              <span className="text-sm text-slate-600">¿No tienes cuenta? </span>
-              <Link href="/register" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+              <span className="text-sm text-slate-600 dark:text-slate-400 transition-colors">¿No tienes cuenta? </span>
+              <Link href="/register" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
                 Regístrate aquí
               </Link>
             </div>
             <div>
-              <Link href="/staff" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+              <Link href="/staff" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
                 Acceso Empleados
               </Link>
             </div>

@@ -46,67 +46,67 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Panel de Resumen</h1>
-        <p className="text-slate-500 mt-1">Visión general del estado de la distribuidora.</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">Panel de Resumen</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1 transition-colors">Visión general del estado de la distribuidora.</p>
       </div>
 
       {/* Cards Superiores */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Card 1 */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+        <div className="bg-white dark:bg-[#242729] rounded-xl shadow-sm border border-slate-200 dark:border-white/5 p-6 flex items-center gap-4 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Ventas Totales</p>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrencyCLP(ventasTotales)}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Ventas Totales</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrencyCLP(ventasTotales)}</p>
           </div>
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+        <div className="bg-white dark:bg-[#242729] rounded-xl shadow-sm border border-slate-200 dark:border-white/5 p-6 flex items-center gap-4 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Órdenes Pendientes</p>
-            <p className="text-2xl font-bold text-slate-900">{ordenesPendientes}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Órdenes Pendientes</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{ordenesPendientes}</p>
           </div>
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+        <div className="bg-white dark:bg-[#242729] rounded-xl shadow-sm border border-slate-200 dark:border-white/5 p-6 flex items-center gap-4 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-brand-primary/10 dark:bg-brand-primary/80/20 flex items-center justify-center text-brand-primary dark:text-brand-primary/90 dark:text-brand-primary shrink-0">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Clientes Empresa</p>
-            <p className="text-2xl font-bold text-slate-900">{nuevosClientesEmpresa}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Clientes Empresa</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{nuevosClientesEmpresa}</p>
           </div>
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+        <div className="bg-white dark:bg-[#242729] rounded-xl shadow-sm border border-slate-200 dark:border-white/5 p-6 flex items-center gap-4 transition-colors">
+          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Alertas de Stock</p>
-            <p className="text-2xl font-bold text-slate-900">{alertasStock}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Alertas de Stock</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{alertasStock}</p>
           </div>
         </div>
 
       </div>
 
       {/* Tabla de Órdenes Recientes */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-200">
-          <h3 className="text-lg font-bold text-slate-900">Órdenes Recientes</h3>
+      <div className="bg-white dark:bg-[#242729] rounded-xl shadow-sm border border-slate-200 dark:border-white/5 overflow-hidden transition-colors">
+        <div className="px-6 py-5 border-b border-slate-200 dark:border-white/5">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Órdenes Recientes</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-200 dark:border-white/5 transition-colors">
               <tr>
                 <th className="px-6 py-4">ID Orden</th>
                 <th className="px-6 py-4">Cliente</th>
@@ -115,29 +115,29 @@ export default async function AdminDashboardPage() {
                 <th className="px-6 py-4">Fecha</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {recientes.length > 0 ? (
                 recientes.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-slate-500">
+                  <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400 transition-colors">
                       {order.id.split('-')[0]}...
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-900">
+                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-white transition-colors">
                       {order.user?.name || order.user?.rut || 'Cliente Desconocido'}
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700">
+                    <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 transition-colors">
                       {formatCurrencyCLP(order.total)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-bold ${
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-bold transition-colors ${
                         ['PAGADO', 'COMPLETED', 'AUTHORIZATION_OK'].includes(order.estado) 
-                          ? 'bg-emerald-100 text-emerald-700' 
-                          : 'bg-amber-100 text-amber-700'
+                          ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
+                          : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
                       }`}>
                         {order.estado}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500">
+                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400 transition-colors">
                       {new Date(order.createdAt).toLocaleDateString('es-CL', {
                         day: '2-digit',
                         month: 'short',

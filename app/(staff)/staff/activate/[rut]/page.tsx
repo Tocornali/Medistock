@@ -30,20 +30,20 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-brand-dark transition-colors px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-white dark:bg-[#242729] p-8 rounded-xl shadow-lg">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white transition-colors">
             Activación Corporativa
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-400">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-slate-400 transition-colors">
             Define tus credenciales para el RUT {rut}
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-300">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">
                 Nombre Completo
               </label>
               <input
@@ -51,13 +51,13 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
                 name="name"
                 type="text"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-600 bg-slate-700/50 px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full appearance-none rounded-md border border-gray-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-4 py-3 text-gray-900 dark:text-white transition-colors placeholder-gray-500 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">
                 Email Corporativo
               </label>
               <input
@@ -65,13 +65,13 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
                 name="email"
                 type="email"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-600 bg-slate-700/50 px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full appearance-none rounded-md border border-gray-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-4 py-3 text-gray-900 dark:text-white transition-colors placeholder-gray-500 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">
                 Nueva Contraseña
               </label>
               <input
@@ -79,7 +79,7 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
                 name="password"
                 type="password"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-600 bg-slate-700/50 px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full appearance-none rounded-md border border-gray-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-4 py-3 text-gray-900 dark:text-white transition-colors placeholder-gray-500 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -87,7 +87,7 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-sm text-center py-2 rounded-md">
+            <div className="text-red-500 text-sm text-center">
               {error}
             </div>
           )}
@@ -96,7 +96,7 @@ export default function StaffActivatePage({ params }: { params: { rut: string } 
             <button
               type="submit"
               disabled={pending}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all disabled:opacity-50"
+              className="group relative flex w-full justify-center rounded-md border border-transparent dark:border-white/10 bg-brand-primary px-4 py-3 text-sm font-bold text-white hover:bg-[#1A9089] focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 transition-all disabled:opacity-50"
             >
               {pending ? "Activando..." : "Activar Cuenta y Continuar"}
             </button>

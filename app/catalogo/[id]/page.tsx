@@ -33,20 +33,20 @@ export default async function ProductDetailPage({
 
   // 3. Renderizamos la vista de producto
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark transition-colors py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         
         {/* Breadcrumb / Navegación */}
-        <nav className="mb-8 flex text-sm font-medium text-slate-500">
-          <Link href="/catalogo" className="hover:text-blue-600 transition-colors">
+        <nav className="mb-8 flex text-sm font-medium text-slate-500 dark:text-slate-400 transition-colors">
+          <Link href="/catalogo" className="hover:text-brand-primary transition-colors">
             Catálogo
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-slate-800">{product.nombre}</span>
+          <span className="text-slate-800 dark:text-white transition-colors">{product.nombre}</span>
         </nav>
 
         {/* Contenedor Principal: 2 Columnas */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-[#242729] rounded-3xl shadow-sm border border-slate-200 dark:border-white/10 overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2">
             
             {/* Izquierda: Imagen del producto */}
@@ -61,17 +61,17 @@ export default async function ProductDetailPage({
             <div className="p-8 md:p-12 flex flex-col">
               
               <div className="mb-2">
-                <span className="inline-block bg-slate-100 text-slate-600 font-mono text-sm px-3 py-1 rounded-lg">
+                <span className="inline-block bg-slate-100 text-slate-600 dark:text-slate-400 transition-colors font-mono text-sm px-3 py-1 rounded-lg">
                   SKU: {product.sku}
                 </span>
               </div>
               
-              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white transition-colors leading-tight mb-4 tracking-tight">
                 {product.nombre}
               </h1>
 
               <div className="mb-8 flex flex-col items-start">
-                <p className="text-4xl font-black text-blue-600">
+                <p className="text-4xl font-black text-brand-primary">
                   {formatCurrencyCLP(finalPrice)}
                 </p>
                 {isCompany && (
@@ -79,12 +79,12 @@ export default async function ProductDetailPage({
                     Precio Mayorista
                   </span>
                 )}
-                <p className="text-sm text-slate-500 mt-2">Precio neto. Impuestos calculados en el checkout.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 transition-colors mt-2">Precio neto. Impuestos calculados en el checkout.</p>
               </div>
 
               <div className="prose prose-slate mb-10">
-                <h3 className="text-lg font-bold text-slate-800 mb-2">Descripción del Producto</h3>
-                <p className="text-slate-600 leading-relaxed">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white transition-colors mb-2">Descripción del Producto</h3>
+                <p className="text-slate-600 dark:text-slate-400 transition-colors leading-relaxed">
                   Insumo médico de alta calidad certificado para uso clínico y hospitalario. 
                   Este producto cumple con todos los estándares regulatorios vigentes y garantiza 
                   la máxima seguridad para pacientes y profesionales de la salud.
@@ -92,9 +92,9 @@ export default async function ProductDetailPage({
               </div>
 
               {/* Sección Inferior: Stock y Botón */}
-              <div className="mt-auto pt-8 border-t border-slate-100">
+              <div className="mt-auto pt-8 border-t border-slate-100 dark:border-white/10">
                 <div className="flex items-center justify-between mb-6">
-                  <span className="text-slate-700 font-medium">Disponibilidad:</span>
+                  <span className="text-slate-700 dark:text-slate-300 transition-colors font-medium">Disponibilidad:</span>
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
                     product.stock_global > 20 ? 'bg-emerald-100 text-emerald-700' : 
                     product.stock_global > 0 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'

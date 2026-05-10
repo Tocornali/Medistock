@@ -40,13 +40,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-lg border border-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-brand-dark transition-colors px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-white dark:bg-[#242729] p-8 rounded-xl shadow-lg border border-slate-100 dark:border-white/10">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900 dark:text-white transition-colors tracking-tight">
             Crear Cuenta
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-600">
+          <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400 transition-colors">
             Regístrate en Medistock para comenzar
           </p>
         </div>
@@ -60,8 +60,8 @@ export default function RegisterPage() {
               onClick={() => setAccountType("PERSONA")}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
                 accountType === "PERSONA" 
-                  ? "bg-white text-slate-900 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white dark:bg-[#242729] text-slate-900 dark:text-white transition-colors shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-colors"
               }`}
             >
               Persona
@@ -71,8 +71,8 @@ export default function RegisterPage() {
               onClick={() => setAccountType("EMPRESA")}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
                 accountType === "EMPRESA" 
-                  ? "bg-white text-slate-900 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white dark:bg-[#242729] text-slate-900 dark:text-white transition-colors shadow-sm" 
+                  : "text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-colors"
               }`}
             >
               Empresa
@@ -81,7 +81,7 @@ export default function RegisterPage() {
 
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                 Nombre Completo
               </label>
               <input
@@ -90,12 +90,12 @@ export default function RegisterPage() {
                 type="text"
                 autoComplete="name"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                 placeholder="Juan Pérez"
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                 Correo Electrónico
               </label>
               <input
@@ -104,12 +104,12 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                 placeholder="correo@ejemplo.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                 Contraseña
               </label>
               <div className="relative">
@@ -119,7 +119,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
-                  className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 pr-20 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 pr-20 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                   placeholder="••••••••"
                   onKeyUp={checkCapsLock}
                   onKeyDown={checkCapsLock}
@@ -127,7 +127,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-slate-400 transition-colors focus:outline-none"
                   title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {showPassword ? (
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                     className="absolute inset-y-0 right-10 flex items-center pointer-events-none"
                     title="Bloq Mayús está activado"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-primary/80 dark:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                   </div>
@@ -156,21 +156,21 @@ export default function RegisterPage() {
 
             {accountType === "EMPRESA" && (
               <div className="space-y-4 pt-4 border-t border-slate-200">
-                <h3 className="text-sm font-medium text-slate-900">Datos de la Empresa</h3>
+                <h3 className="text-sm font-medium text-slate-900 dark:text-white transition-colors">Datos de la Empresa</h3>
                 <div>
-                  <label htmlFor="rut" className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="rut" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     RUT Empresa
                   </label>
                   <RutInput
                     id="rut"
                     name="rut"
                     required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                     placeholder="76.123.456-7"
                   />
                 </div>
                 <div>
-                  <label htmlFor="razonSocial" className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="razonSocial" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     Razón Social
                   </label>
                   <input
@@ -178,12 +178,12 @@ export default function RegisterPage() {
                     name="razonSocial"
                     type="text"
                     required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                     placeholder="Mi Empresa SpA"
                   />
                 </div>
                 <div>
-                  <label htmlFor="giro" className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="giro" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     Giro
                   </label>
                   <input
@@ -191,7 +191,7 @@ export default function RegisterPage() {
                     name="giro"
                     type="text"
                     required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
                     placeholder="Venta al por mayor de..."
                   />
                 </div>
@@ -209,15 +209,15 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={pending}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              className="group relative flex w-full justify-center rounded-md border border-transparent dark:border-white/10 bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#1A9089] focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {pending ? 'Registrando...' : 'Registrarse'}
             </button>
           </div>
           
-          <div className="text-center mt-4 pt-4 border-t border-slate-100">
-            <span className="text-sm text-slate-600">¿Ya tienes una cuenta? </span>
-            <Link href="/login" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+          <div className="text-center mt-4 pt-4 border-t border-slate-100 dark:border-white/10">
+            <span className="text-sm text-slate-600 dark:text-slate-400 transition-colors">¿Ya tienes una cuenta? </span>
+            <Link href="/login" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
               Inicia sesión aquí
             </Link>
           </div>
