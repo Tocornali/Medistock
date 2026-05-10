@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { activateUser } from "@/app/actions/activate"
 
-export default function StaffActivatePage({ params }: { params: { rut: string } }) {
+export default function StaffActivatePage({ params }: { params: Promise<{ rut: string }> }) {
   const router = useRouter()
-  const { rut } = params
+  const { rut } = use(params)
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")

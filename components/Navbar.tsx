@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { auth } from '@/auth'
 import LogoutButton from './LogoutButton'
 import { ThemeToggle } from './ThemeToggle'
+import CatalogLink from './CatalogLink'
 
 export default async function Navbar() {
   const session = await auth()
@@ -25,9 +26,7 @@ export default async function Navbar() {
           MEDISTOCK
         </Link>
         <div className="flex items-center space-x-6 pr-16"> {/* pr-16 deja espacio para el CartIndicator */}
-          <Link href="/catalogo" className="text-slate-600 dark:text-slate-300 hover:text-brand-primary font-medium transition-colors">
-            Catálogo
-          </Link>
+          <CatalogLink />
           
           {session?.user ? (
             <div className="flex items-center gap-4 border-l pl-6 border-slate-200 dark:border-white/10">

@@ -2,6 +2,8 @@
 
 import { useCartStore } from '@/store/useCartStore'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface AddToCartButtonProps {
   product: {
@@ -15,8 +17,15 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const addItem = useCartStore(state => state.addItem)
   const [isAdded, setIsAdded] = useState(false)
+  const { data: session } = useSession()
+  const router = useRouter()
 
   const handleAddToCart = () => {
+    if (!session) {
+      router.push('/login')
+      return
+    }
+
     addItem({ ...product, cantidad: 1 })
     setIsAdded(true)
     setTimeout(() => {

@@ -70,12 +70,15 @@ model VerificationToken {
 }
 
 model Product {
-  id           String  @id @default(uuid())
-  sku          String  @unique
-  nombre       String
-  precio       Float
-  companyPrice Float?
-  stock_global Int
+  id               String  @id @default(uuid())
+  sku              String  @unique
+  nombre           String
+  descripcion      String?
+  especificaciones Json?
+  precio           Float
+  companyPrice     Float?
+  stock_global     Int
+  category         String? @default("General")
 }
 
 model Order {

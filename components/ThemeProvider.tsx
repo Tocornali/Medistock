@@ -1,8 +1,69 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
 
-export function ThemeProvider({ children, ...props }: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+type Theme = "dark" | "light" | "system"
+
+interface ThemeProviderProps {
+  children: React.ReactNode
+  defaultTheme?: Theme
+  storageKey?: string
+}
+
+const ThemeContext = React.createContext<{
+  theme: Theme
+  setTheme: (theme: Theme) => void
+} | null>(null)
+
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+  storageKey = "medistock-theme",
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = React.useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    }
+    return defaultTheme
+  })
+
+  React.useEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove("light", "dark")
+
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light"
+      root.classList.add(systemTheme)
+      return
+    }
+
+    root.classList.add(theme)
+  }, [theme])
+
+  const value = React.useMemo(
+    () => ({
+      theme,
+      setTheme: (theme: Theme) => {
+        localStorage.setItem(storageKey, theme)
+        setTheme(theme)
+      },
+    }),
+    [theme, storageKey]
+  )
+
+  return (
+    <ThemeContext.Provider value={value} {...props}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+export const useTheme = () => {
+  const context = React.useContext(ThemeContext)
+  if (!context) throw new Error("useTheme must be used within a ThemeProvider")
+  return context
 }

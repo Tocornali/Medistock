@@ -3,10 +3,12 @@
 import { useCartStore } from '@/store/useCartStore'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function CartIndicator() {
   const [mounted, setMounted] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
+  const pathname = usePathname()
   
   // Seleccionamos la propiedad 'items' para que Zustand reactive el componente a sus cambios
   const items = useCartStore(state => state.items)
@@ -15,6 +17,10 @@ export default function CartIndicator() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/staff')) {
+    return null
+  }
 
   // Calculamos el totalItems dinámicamente basado en los items
   const totalItems = items.reduce((total, item) => total + item.cantidad, 0)
