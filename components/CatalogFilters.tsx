@@ -53,7 +53,7 @@ export default function CatalogFilters({ categories }: CatalogFiltersProps) {
             <div className="space-y-2">
               <button
                 onClick={() => updateFilters('category', '')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                   currentCategory === ''
                     ? 'bg-brand-primary/10 text-brand-primary font-bold'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
@@ -65,7 +65,7 @@ export default function CatalogFilters({ categories }: CatalogFiltersProps) {
                 <button
                   key={cat}
                   onClick={() => updateFilters('category', cat)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
                     currentCategory === cat
                       ? 'bg-brand-primary/10 text-brand-primary font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'

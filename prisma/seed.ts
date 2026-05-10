@@ -20,13 +20,16 @@ async function main() {
     },
   })
 
-  // 2. Crear productos médicos profesionales
+  // 2. Limpiar y Crear productos médicos profesionales
+  await prisma.product.deleteMany()
+  
   const products = [
     { 
       sku: 'MED-JER-001', 
       nombre: 'Jeringas 5ml (Caja x 100)', 
       descripcion: 'Jeringas hipodérmicas estériles de tres partes, diseñadas para una administración precisa de medicamentos.',
       category: 'Insumos Básicos',
+      image: '/images/products/Jeringas_5ml_(Caja_x_100).png',
       especificaciones: {
         material: 'Polipropileno grado médico',
         estéril: 'Sí (Óxido de Etileno)',
@@ -42,6 +45,7 @@ async function main() {
       nombre: 'Monitor de Presión Arterial Digital', 
       descripcion: 'Monitor de brazo automático con detección de arritmias y memoria para dos usuarios.',
       category: 'Equipamiento',
+      image: '/images/products/Monitor_de_Presion_Arterial_Digital.png',
       especificaciones: {
         tipo: 'Digital de brazo',
         memoria: '90 lecturas',
@@ -57,6 +61,7 @@ async function main() {
       nombre: 'Guantes de Nitrilo M (Caja x 100)', 
       descripcion: 'Guantes de examen sin polvo, alta resistencia y sensibilidad táctil.',
       category: 'Protección',
+      image: '/images/products/Guantes_de_Nitrilo_M_(Caja_x_100).png',
       especificaciones: {
         material: 'Nitrilo sintético',
         color: 'Azul cobalto',
@@ -72,6 +77,7 @@ async function main() {
       nombre: 'Estetoscopio Cardiológico Pro', 
       descripcion: 'Instrumento acústico de alta sensibilidad para auscultación cardíaca y pulmonar superior.',
       category: 'Diagnóstico',
+      image: '/images/products/Estetoscopio_Cardiologico_Pro.png',
       especificaciones: {
         campana: 'Acero inoxidable',
         diafragma: 'Sintonizable',
@@ -87,6 +93,7 @@ async function main() {
       nombre: 'Gasas Estériles 10x10cm (Caja x 50)', 
       descripcion: 'Compresas de gasa tejida de algodón 100%, altamente absorbentes para curaciones.',
       category: 'Insumos Básicos',
+      image: '/images/products/Gasas Esteriles 10x10cm (Caja x 50).png',
       especificaciones: {
         capas: '12 pliegues',
         hilos: '20x12',
@@ -102,6 +109,7 @@ async function main() {
       nombre: 'Oxímetro de Pulso Profesional', 
       descripcion: 'Medición rápida y precisa de SpO2 y frecuencia cardíaca con pantalla OLED.',
       category: 'Diagnóstico',
+      image: '/images/products/Oximetro de Pulso Profesional.png',
       especificaciones: {
         rango_SpO2: '70% - 100%',
         rango_pulso: '30 - 250 bpm',
@@ -117,6 +125,7 @@ async function main() {
       nombre: 'Mascarillas KN95 (Caja x 20)', 
       descripcion: 'Mascarillas de alta filtración con 5 capas de protección, diseño ergonómico.',
       category: 'Protección',
+      image: '/images/products/Mascarilla KN95 (Caja x 20).png',
       especificaciones: {
         filtracion: '>= 95%',
         capas: '5 capas',
@@ -132,6 +141,7 @@ async function main() {
       nombre: 'Termómetro Infrarrojo Sin Contacto', 
       descripcion: 'Medición instantánea de temperatura corporal a distancia con alerta sonora.',
       category: 'Diagnóstico',
+      image: '/images/products/Termometro Infrarrojo Frontal.png',
       especificaciones: {
         distancia: '3 - 5 cm',
         tiempo: '< 1 segundo',
@@ -144,63 +154,67 @@ async function main() {
     },
     { 
       sku: 'MED-CAM-001', 
-      nombre: 'Cama Clínica Eléctrica Pro', 
-      descripcion: 'Cama de hospitalización con 3 funciones eléctricas: respaldo, pies y altura.',
+      nombre: 'Cama Clínica Manual de 2 Manivelas', 
+      descripcion: 'Catre clínico con sistema de manivelas para ajuste de respaldo y piernas.',
       category: 'Mobiliario',
+      image: '/images/products/Catre Clinico Manual de 2 Manivelas.png',
       especificaciones: {
-        motores: '3 motores silenciosos',
+        manivelas: '2',
         material: 'Acero esmaltado',
         barandas: 'Aluminio plegable',
-        carga_max: '250 kg'
+        carga_max: '180 kg'
       },
-      precio: 850000, 
-      companyPrice: 722500,
-      stock_global: 3 
+      precio: 450000, 
+      companyPrice: 382500,
+      stock_global: 8 
     },
     { 
-      sku: 'MED-BAT-001', 
-      nombre: 'Bata Quirúrgica Estéril (Unidad)', 
-      descripcion: 'Bata de alta protección contra fluidos, diseño reforzado en pecho y mangas.',
+      sku: 'MED-DES-001', 
+      nombre: 'Desfibrilador Externo Automático (DEA)', 
+      descripcion: 'Equipo de emergencia portátil para RCP con guía de voz y parches pediátricos/adultos.',
+      category: 'Equipamiento',
+      image: '/images/products/Desfibrilador Externo Automatico.png',
+      especificaciones: {
+        tipo: 'Automático',
+        bateria: 'Larga duración (5 años)',
+        certificaciones: 'FDA, CE',
+        accesorios: 'Kit de rescate incluido'
+      },
+      precio: 1200000, 
+      companyPrice: 1050000,
+      stock_global: 4 
+    },
+    { 
+      sku: 'MED-SUE-001', 
+      nombre: 'Suero Fisiológico 0.9% (500ml)', 
+      descripcion: 'Solución isotónica para irrigación, limpieza de heridas e hidratación.',
+      category: 'Insumos Básicos',
+      image: '/images/products/Suero Fisiologico 0.9 500ml.png',
+      especificaciones: {
+        concentracion: '0.9% NaCl',
+        formato: 'Bolsa PVC free',
+        volumen: '500ml',
+        estéril: 'Sí'
+      },
+      precio: 2500, 
+      companyPrice: 1900,
+      stock_global: 120 
+    },
+    { 
+      sku: 'MED-PEC-001', 
+      nombre: 'Pecheras Desechables Manga Larga', 
+      descripcion: 'Protección corporal impermeable de polietileno con lazo en cintura.',
       category: 'Vestuario',
+      image: '/images/products/Pecheras Desechables Manga Larga.png',
       especificaciones: {
-        material: 'SMS 45g',
-        estéril: 'Sí',
-        talla: 'L (Universal)',
-        puños: 'Algodón elástico'
+        material: 'CPE',
+        espesor: '30 micrones',
+        talla: 'Universal',
+        puños: 'Elásticos'
       },
-      precio: 4500, 
-      companyPrice: 3825,
-      stock_global: 300 
-    },
-    { 
-      sku: 'MED-ALC-001', 
-      nombre: 'Alcohol Gel 70% (Envase 1L)', 
-      descripcion: 'Gel sanitizante para manos con glicerina para mayor cuidado de la piel.',
-      category: 'Insumos Críticos',
-      especificaciones: {
-        concentracion: '70% Etanol',
-        formato: 'Botella con dosificador',
-        ph: 'Neutro',
-        registro: 'ISP 1234/26'
-      },
-      precio: 6800, 
-      companyPrice: 5440,
-      stock_global: 80 
-    },
-    { 
-      sku: 'MED-CUB-001', 
-      nombre: 'Cubrecalzado Desechable (Bolsa x 100)', 
-      descripcion: 'Fundas protectoras antideslizantes para calzado, ideales para áreas limpias.',
-      category: 'Vestuario',
-      especificaciones: {
-        material: 'CPE (Polietileno Clorado)',
-        talla: 'Estándar (Universal)',
-        espesor: '40 micrones',
-        color: 'Celeste'
-      },
-      precio: 6500, 
-      companyPrice: 4900,
-      stock_global: 45 
+      precio: 8500, 
+      companyPrice: 6800,
+      stock_global: 50 
     }
   ]
 

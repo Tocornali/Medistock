@@ -53,9 +53,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* Imagen del Producto */}
-            <div className="p-12 bg-slate-100 dark:bg-white/5 flex items-center justify-center border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-white/10">
-              <Package className="w-48 h-48 text-slate-300 dark:text-slate-700" />
+            {/* Imagen del producto */}
+            <div className="lg:w-full bg-slate-100 dark:bg-white/5 flex items-center justify-center p-12 min-h-[400px] border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-white/10">
+              {product.image ? (
+                <img 
+                  src={product.image} 
+                  alt={product.nombre}
+                  className="max-w-full max-h-full object-contain drop-shadow-2xl"
+                />
+              ) : (
+                <Package className="w-32 h-32 text-slate-300 dark:text-slate-700" />
+              )}
             </div>
 
             {/* Información Principal */}

@@ -10,8 +10,11 @@ import { SessionProvider } from 'next-auth/react'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'MEDISTOCK - Inicio',
-  description: 'Sistema integral de catálogo y gestión médica',
+  title: 'MEDISTOCK | Insumos Médicos Profesionales',
+  description: 'Sistema integral de catálogo y gestión médica de alta calidad',
+  icons: {
+    icon: '/images/Favicon.png',
+  },
 }
 
 export default async function RootLayout({
@@ -24,6 +27,17 @@ export default async function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Filtro para eliminar fondos oscuros de logos no transparentes */}
+        <svg width="0" height="0" style={{ position: 'absolute' }}>
+          <filter id="remove-dark-bg" colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix" values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              1 1 1 0 -1
+            " />
+          </filter>
+        </svg>
         <script
           dangerouslySetInnerHTML={{
             __html: `

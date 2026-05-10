@@ -79,6 +79,7 @@ model Product {
   companyPrice     Float?
   stock_global     Int
   category         String? @default("General")
+  image            String?
 }
 
 model Order {

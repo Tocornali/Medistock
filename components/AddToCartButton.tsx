@@ -39,7 +39,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     <button
       onClick={handleAddToCart}
       disabled={isOutOfStock}
-      className={`mt-4 w-full text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm ${
+      className={`mt-4 w-full text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
         isOutOfStock 
           ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' 
           : isAdded 

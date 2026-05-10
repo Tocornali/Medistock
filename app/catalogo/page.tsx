@@ -116,9 +116,17 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
                     key={product.id}
                     className="bg-white dark:bg-[#242729] rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col group"
                   >
-                    {/* Placeholder para imagen con categoría */}
+                    {/* Imagen del producto */}
                     <div className="h-48 bg-slate-100 dark:bg-white/5 flex items-center justify-center relative overflow-hidden">
-                      <Package className="w-16 h-16 text-slate-300 dark:text-slate-700 group-hover:scale-110 transition-transform duration-500" />
+                      {product.image ? (
+                        <img 
+                          src={product.image} 
+                          alt={product.nombre}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <Package className="w-16 h-16 text-slate-300 dark:text-slate-700 group-hover:scale-110 transition-transform duration-500" />
+                      )}
                       <div className="absolute top-4 left-4">
                         <span className="px-3 py-1 bg-white/80 dark:bg-black/40 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">
                           {product.category || 'Insumo'}
@@ -128,8 +136,8 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
 
                     <div className="p-6 flex-1 flex flex-col">
                       <div className="mb-4 flex-1">
-                        <Link href={`/productos/${product.id}`} className="block group/link">
-                          <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight mb-2 line-clamp-2 group-hover/link:text-brand-primary transition-colors">
+                        <Link href={`/productos/${product.id}`} className="block group/link cursor-pointer">
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight mb-2 line-clamp-2 group-hover/link:text-brand-primary transition-colors cursor-pointer">
                             {product.nombre}
                           </h3>
                         </Link>
