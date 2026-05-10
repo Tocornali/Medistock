@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { preRegisterEmployee } from "@/app/actions/admin"
+import RutInput from "@/components/RutInput"
 
 export default function AdminEmpleadosPage() {
   const [rut, setRut] = useState("")
@@ -35,8 +36,7 @@ export default function AdminEmpleadosPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">RUT del Empleado</label>
-            <input
-              type="text"
+            <RutInput
               required
               placeholder="12345678-9"
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"

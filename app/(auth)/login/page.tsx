@@ -8,7 +8,7 @@ import { checkAccountStatus } from "@/app/actions/login"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [identifier, setIdentifier] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [capsLockActive, setCapsLockActive] = useState(false)
@@ -22,20 +22,25 @@ export default function LoginPage() {
     e.preventDefault()
     setError("")
 
-    const status = await checkAccountStatus(identifier)
-    if (status.exists && !status.isActive) {
+    const status = await checkAccountStatus(email)
+    if (status.exists && !status.isActive && status.rut) {
       router.push(`/auth/activate/${status.rut}`)
       return
     }
 
     const result = await signIn("credentials", {
-      identifier,
+      email,
       password,
+      portal: "CLIENT",
       redirect: false,
     })
 
     if (result?.error) {
-      setError("Credenciales inválidas")
+      if (result.error.includes("USE_STAFF_PORTAL")) {
+        setError("Esta cuenta pertenece al personal. Por favor ingresa por la Intranet Corporativa (/staff).")
+      } else {
+        setError("Credenciales inválidas")
+      }
     } else {
       const session = await getSession()
       const role = (session?.user as any)?.role
@@ -65,19 +70,19 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700">
-                Correo Electrónico o RUT
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Correo Electrónico
               </label>
               <input
-                id="identifier"
-                name="identifier"
-                type="text"
-                autoComplete="username"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
                 required
                 className="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="ejemplo@correo.com o 12345678-9"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="ejemplo@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
@@ -144,11 +149,18 @@ export default function LoginPage() {
             </button>
           </div>
           
-          <div className="text-center mt-4 pt-4 border-t border-slate-100">
-            <span className="text-sm text-slate-600">¿No tienes cuenta? </span>
-            <Link href="/register" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
-              Regístrate aquí
-            </Link>
+          <div className="text-center mt-4 pt-4 border-t border-slate-100 flex flex-col space-y-3">
+            <div>
+              <span className="text-sm text-slate-600">¿No tienes cuenta? </span>
+              <Link href="/register" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                Regístrate aquí
+              </Link>
+            </div>
+            <div>
+              <Link href="/staff" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                Acceso Empleados
+              </Link>
+            </div>
           </div>
         </form>
       </div>

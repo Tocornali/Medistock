@@ -4,6 +4,7 @@ import { useState } from "react"
 import { registerUser } from "@/app/actions/register"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import RutInput from "@/components/RutInput"
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
@@ -108,19 +109,6 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label htmlFor="rut" className="block text-sm font-medium text-slate-700 mb-1">
-                RUT
-              </label>
-              <input
-                id="rut"
-                name="rut"
-                type="text"
-                required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                placeholder="12345678-9"
-              />
-            </div>
-            <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
                 Contraseña
               </label>
@@ -169,6 +157,18 @@ export default function RegisterPage() {
             {accountType === "EMPRESA" && (
               <div className="space-y-4 pt-4 border-t border-slate-200">
                 <h3 className="text-sm font-medium text-slate-900">Datos de la Empresa</h3>
+                <div>
+                  <label htmlFor="rut" className="block text-sm font-medium text-slate-700 mb-1">
+                    RUT Empresa
+                  </label>
+                  <RutInput
+                    id="rut"
+                    name="rut"
+                    required={accountType === "EMPRESA"}
+                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                    placeholder="76.123.456-7"
+                  />
+                </div>
                 <div>
                   <label htmlFor="razonSocial" className="block text-sm font-medium text-slate-700 mb-1">
                     Razón Social

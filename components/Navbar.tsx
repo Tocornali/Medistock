@@ -4,6 +4,18 @@ import LogoutButton from './LogoutButton'
 
 export default async function Navbar() {
   const session = await auth()
+  
+  let profileUrl = '/mis-ordenes';
+  if (session?.user) {
+    const role = (session.user as any).role;
+    if (role === 'ADMIN' || role === 'FINANCE') {
+      profileUrl = '/dashboard/admin';
+    } else if (role === 'LOGISTICS') {
+      profileUrl = '/dashboard/inventory';
+    } else if (role === 'SALES') {
+      profileUrl = '/dashboard/orders';
+    }
+  }
 
   return (
     <nav className="fixed top-0 w-full bg-white border-b border-slate-200 z-40 shadow-sm h-16">
@@ -18,9 +30,13 @@ export default async function Navbar() {
           
           {session?.user ? (
             <div className="flex items-center gap-4 border-l pl-6 border-slate-200">
-              <span className="text-sm text-slate-700 font-medium">
-                {session.user.name || session.user.email}
-              </span>
+              <Link 
+                href={profileUrl}
+                className="text-sm text-slate-700 font-medium hover:text-blue-600 transition-colors"
+                title="Ir a mi panel"
+              >
+                {session.user.name || session.user.email || 'Mi Cuenta'}
+              </Link>
               <LogoutButton />
             </div>
           ) : (

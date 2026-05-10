@@ -25,7 +25,7 @@ model User {
   password      String?
   role          Role      @default(USER)
   isActive      Boolean   @default(false)
-  rut           String    @unique
+  rut           String?   @unique
   razonSocial   String?
   giro          String?
   direccionFact String?
@@ -79,10 +79,11 @@ model Product {
 }
 
 model Order {
-  id             String  @id @default(uuid())
+  id             String   @id @default(uuid())
   userId         String
   total          Float
-  estado         String  @default("PENDING")
+  estado         String   @default("PENDING")
+  createdAt      DateTime @default(now())
   
   deliveryMethod String?
   deliverySpeed  String?

@@ -16,12 +16,12 @@ export async function registerUser(formData: FormData) {
 
   const role = accountType === "EMPRESA" ? Role.COMPANY : Role.USER
 
-  if (!name || !email || !password || !rut) {
+  if (!name || !email || !password) {
     return { error: "Todos los campos básicos son obligatorios" }
   }
 
-  if (accountType === "EMPRESA" && (!razonSocial || !giro)) {
-    return { error: "Los datos de la empresa son obligatorios" }
+  if (accountType === "EMPRESA" && (!rut || !razonSocial || !giro)) {
+    return { error: "Los datos de la empresa (RUT, Razón Social, Giro) son obligatorios" }
   }
 
   // Verificar si el correo ya existe
@@ -33,11 +33,13 @@ export async function registerUser(formData: FormData) {
     return { error: "El correo electrónico ya está registrado. Por favor, inicia sesión." }
   }
 
-  const existingRut = await prisma.user.findUnique({
-    where: { rut }
-  })
-  if (existingRut) {
-    return { error: "El RUT ya está registrado." }
+  if (rut) {
+    const existingRut = await prisma.user.findUnique({
+      where: { rut }
+    })
+    if (existingRut) {
+      return { error: "El RUT ya está registrado." }
+    }
   }
 
   // Hashear la contraseña con bcryptjs
@@ -49,10 +51,10 @@ export async function registerUser(formData: FormData) {
         name,
         email,
         password: hashedPassword,
-        rut,
         isActive: true, // Si se registran ellos mismos, entran activos
         role: role as Role,
         ...(accountType === "EMPRESA" ? {
+          rut,
           razonSocial,
           giro
         } : {})
