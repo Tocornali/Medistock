@@ -28,6 +28,31 @@ export function ThemeProvider({
     return defaultTheme
   })
 
+  React.useLayoutEffect(() => {
+    const root = window.document.documentElement
+    const savedTheme = localStorage.getItem(storageKey) as Theme | null
+    
+    const applyTheme = (t: Theme) => {
+      root.classList.remove("light", "dark")
+      if (t === "system") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+        root.classList.add(systemTheme)
+      } else {
+        root.classList.add(t)
+      }
+    }
+
+    if (savedTheme) {
+      setTheme(savedTheme)
+      applyTheme(savedTheme)
+    } else {
+      applyTheme(defaultTheme)
+    }
+
+    // Quitar el indicador de carga para mostrar el contenido
+    root.removeAttribute('data-theme-loading')
+  }, [])
+
   React.useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove("light", "dark")

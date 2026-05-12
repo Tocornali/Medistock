@@ -3,10 +3,21 @@
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
-export async function activateUser(rut: string, data: { name: string, email: string, password: string }) {
-  if (!data.name || !data.email || !data.password) {
-    return { error: "Todos los campos son obligatorios" }
+import { authSchema } from "@/lib/validations/auth"
+import { z } from "zod"
+
+const staffActivateSchema = authSchema.extend({
+  name: z.string().min(1, "El nombre es obligatorio"),
+})
+
+export async function activateUser(rut: string, rawData: any) {
+  const validation = staffActivateSchema.safeParse(rawData)
+
+  if (!validation.success) {
+    return { error: validation.error.issues[0].message }
   }
+
+  const data = validation.data
 
   const user = await prisma.user.findUnique({
     where: { rut }

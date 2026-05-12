@@ -10,7 +10,7 @@ export default function LogoutButton() {
     // 1. Limpiamos el carrito (estado global del cliente)
     clearCart()
     // 2. Cerramos la sesión
-    await signOut({ callbackUrl: "/" })
+    await signOut({ callbackUrl: "/login" })
   }
 
   return (

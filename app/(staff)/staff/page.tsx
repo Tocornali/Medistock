@@ -86,15 +86,7 @@ export default function StaffLoginPage() {
 
   return (
     <div className="flex min-h-screen relative items-center justify-center bg-gray-50 dark:bg-brand-dark transition-colors px-4 py-12 sm:px-6 lg:px-8">
-      {/* Botón de retroceso al portal de clientes */}
-      <a 
-        href="/login" 
-        className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-white transition-colors transition-colors text-sm font-medium z-10"
-        title="Volver al inicio de sesión de clientes"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Volver a Clientes</span>
-      </a>
+
 
       <div className="w-full max-w-md space-y-8 bg-white dark:bg-[#242729] p-8 rounded-xl shadow-lg relative z-20">
         <div className="flex flex-col items-center">

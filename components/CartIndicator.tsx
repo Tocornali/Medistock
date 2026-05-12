@@ -18,10 +18,8 @@ export default function CartIndicator() {
     setMounted(true)
   }, [])
 
-  if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/staff')) {
-    return null
-  }
-
+  const isHiddenPath = pathname?.startsWith('/dashboard') || pathname?.startsWith('/staff')
+  
   // Calculamos el totalItems dinámicamente basado en los items
   const totalItems = items.reduce((total, item) => total + item.cantidad, 0)
 
@@ -34,7 +32,7 @@ export default function CartIndicator() {
     }
   }, [totalItems])
 
-  if (!mounted) return null
+  if (!mounted || isHiddenPath) return null
 
   return (
     <div className="fixed top-2 right-4 z-50">

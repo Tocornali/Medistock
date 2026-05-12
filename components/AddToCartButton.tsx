@@ -21,11 +21,6 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const router = useRouter()
 
   const handleAddToCart = () => {
-    if (!session) {
-      router.push('/login')
-      return
-    }
-
     addItem({ ...product, cantidad: 1 })
     setIsAdded(true)
     setTimeout(() => {

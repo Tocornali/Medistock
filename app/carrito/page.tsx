@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatCurrencyCLP } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
 
 export default function CarritoPage() {
+  const { data: session } = useSession()
   const [mounted, setMounted] = useState(false)
   const { items, updateQuantity, removeItem, clearCart } = useCartStore()
   const router = useRouter()
@@ -27,6 +29,10 @@ export default function CarritoPage() {
   const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
 
   const handleFinalizar = () => {
+    if (!session) {
+      router.push('/login?callbackUrl=/checkout')
+      return
+    }
     router.push('/checkout')
   }
 

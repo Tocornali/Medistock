@@ -36,6 +36,12 @@ export default function SidebarNav({ role }: { role: string }) {
       label: "Gestión de Empleados",
       icon: Users,
       roles: ['ADMIN']
+    },
+    {
+      href: "/mis-ordenes",
+      label: "Mis Órdenes",
+      icon: ShoppingCart,
+      roles: ['USER', 'COMPANY']
     }
   ]
 

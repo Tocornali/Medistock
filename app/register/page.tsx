@@ -1,37 +1,91 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { registerSchema, type RegisterSchema } from "@/lib/validations/auth"
+import { useRouter } from "next/navigation"
 import { registerUser } from "@/app/actions/register"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import RutInput from "@/components/RutInput"
+import { signIn } from "next-auth/react"
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [capsLockActive, setCapsLockActive] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [accountType, setAccountType] = useState<"PERSONA" | "EMPRESA">("PERSONA")
+  const router = useRouter()
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isValid }
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+    defaultValues: {
+      accountType: "PERSONA",
+      name: "",
+      email: "",
+      password: "",
+      rut: "",
+      razonSocial: "",
+      giro: ""
+    }
+  })
+
+  const accountType = watch("accountType")
+
+  const toggleAccountType = (type: "PERSONA" | "EMPRESA") => {
+    reset({
+      accountType: type,
+      name: "",
+      email: "",
+      password: "",
+      rut: "",
+      razonSocial: "",
+      giro: ""
+    })
+    setError(null)
+  }
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setCapsLockActive(e.getModifierState('CapsLock'))
   }
-  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onSubmit = async (data: RegisterSchema) => {
     setError(null)
     setPending(true)
     
-    const formData = new FormData(e.currentTarget)
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined) formData.append(key, value)
+    })
     
     try {
       const result = await registerUser(formData)
+      
       if (result?.error) {
         setError(result.error)
         setPending(false)
       } else if (result?.success) {
-        router.push("/login")
+        // Auto-login tras el registro exitoso
+        const loginResult = await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false
+        })
+
+        if (loginResult?.error) {
+          // Si el auto-login falla, mandamos a login manual
+          router.push("/login")
+        } else {
+          router.push("/")
+        }
       }
     } catch (err) {
       setError("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
@@ -51,28 +105,26 @@ export default function RegisterPage() {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <input type="hidden" name="accountType" value={accountType} />
-          
-          <div className="flex bg-slate-100 p-1 rounded-lg">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex bg-slate-100 dark:bg-brand-dark/50 p-1 rounded-lg border border-transparent dark:border-white/10 transition-colors relative">
             <button
               type="button"
-              onClick={() => setAccountType("PERSONA")}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+              onClick={() => toggleAccountType("PERSONA")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer active:scale-95 ${
                 accountType === "PERSONA" 
-                  ? "bg-white dark:bg-[#242729] text-slate-900 dark:text-white transition-colors shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-colors"
+                  ? "bg-white dark:bg-brand-dark text-slate-900 dark:text-white shadow-sm border border-transparent dark:border-white/10" 
+                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5"
               }`}
             >
               Persona
             </button>
             <button
               type="button"
-              onClick={() => setAccountType("EMPRESA")}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+              onClick={() => toggleAccountType("EMPRESA")}
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer active:scale-95 ${
                 accountType === "EMPRESA" 
-                  ? "bg-white dark:bg-[#242729] text-slate-900 dark:text-white transition-colors shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700 dark:text-slate-300 transition-colors"
+                  ? "bg-white dark:bg-brand-dark text-slate-900 dark:text-white shadow-sm border border-transparent dark:border-white/10" 
+                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/5"
               }`}
             >
               Empresa
@@ -85,28 +137,28 @@ export default function RegisterPage() {
                 Nombre Completo
               </label>
               <input
+                {...register("name")}
                 id="name"
-                name="name"
                 type="text"
-                autoComplete="name"
-                required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                autoComplete="off"
+                className={`mt-1 block w-full appearance-none rounded-md border ${errors.name ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                 placeholder="Juan Pérez"
               />
+              {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                 Correo Electrónico
               </label>
               <input
+                {...register("email")}
                 id="email"
-                name="email"
                 type="email"
-                autoComplete="email"
-                required
-                className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                autoComplete="off"
+                className={`mt-1 block w-full appearance-none rounded-md border ${errors.email ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                 placeholder="correo@ejemplo.com"
               />
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
@@ -114,12 +166,11 @@ export default function RegisterPage() {
               </label>
               <div className="relative">
                 <input
+                  {...register("password")}
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 pr-20 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                  autoComplete="off"
+                  className={`mt-1 block w-full appearance-none rounded-md border ${errors.password ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 pr-20 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                   placeholder="••••••••"
                   onKeyUp={checkCapsLock}
                   onKeyDown={checkCapsLock}
@@ -141,59 +192,51 @@ export default function RegisterPage() {
                     </svg>
                   )}
                 </button>
-                {capsLockActive && (
-                  <div 
-                    className="absolute inset-y-0 right-10 flex items-center pointer-events-none"
-                    title="Bloq Mayús está activado"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-primary/80 dark:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                  </div>
-                )}
               </div>
+              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
             </div>
 
             {accountType === "EMPRESA" && (
-              <div className="space-y-4 pt-4 border-t border-slate-200">
+              <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
                 <h3 className="text-sm font-medium text-slate-900 dark:text-white transition-colors">Datos de la Empresa</h3>
                 <div>
                   <label htmlFor="rut" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     RUT Empresa
                   </label>
                   <RutInput
+                    {...register("rut")}
                     id="rut"
-                    name="rut"
-                    required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                    className={`mt-1 block w-full appearance-none rounded-md border ${errors.rut ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                     placeholder="76.123.456-7"
+                    onChange={(e) => setValue("rut", e.target.value, { shouldValidate: true })}
                   />
+                  {errors.rut && <p className="mt-1 text-xs text-red-500">{errors.rut.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="razonSocial" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     Razón Social
                   </label>
                   <input
+                    {...register("razonSocial")}
                     id="razonSocial"
-                    name="razonSocial"
                     type="text"
-                    required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                    className={`mt-1 block w-full appearance-none rounded-md border ${errors.razonSocial ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                     placeholder="Mi Empresa SpA"
                   />
+                  {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="giro" className="block text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors mb-1">
                     Giro
                   </label>
                   <input
+                    {...register("giro")}
                     id="giro"
-                    name="giro"
                     type="text"
-                    required={accountType === "EMPRESA"}
-                    className="mt-1 block w-full appearance-none rounded-md border border-slate-300 dark:border-slate-600 bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm"
+                    className={`mt-1 block w-full appearance-none rounded-md border ${errors.giro ? 'border-red-500' : ''} bg-transparent dark:bg-brand-dark/50 px-3 py-2 text-slate-900 dark:text-white transition-colors placeholder-slate-400 focus:border-brand-primary focus:outline-none focus:ring-brand-primary/50 sm:text-sm`}
                     placeholder="Venta al por mayor de..."
                   />
+                  {errors.giro && <p className="mt-1 text-xs text-red-500">{errors.giro.message}</p>}
                 </div>
               </div>
             )}
@@ -208,7 +251,7 @@ export default function RegisterPage() {
           <div>
             <button
               type="submit"
-              disabled={pending}
+              disabled={pending || !isValid}
               className="group relative flex w-full justify-center rounded-md border border-transparent dark:border-white/10 bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-[#1A9089] focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {pending ? 'Registrando...' : 'Registrarse'}

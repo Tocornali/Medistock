@@ -153,18 +153,11 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="text-center mt-4 pt-4 border-t border-slate-100 dark:border-white/10 flex flex-col space-y-3 transition-colors">
-            <div>
-              <span className="text-sm text-slate-600 dark:text-slate-400 transition-colors">¿No tienes cuenta? </span>
-              <Link href="/register" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
-                Regístrate aquí
-              </Link>
-            </div>
-            <div>
-              <Link href="/staff" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
-                Acceso Empleados
-              </Link>
-            </div>
+          <div className="text-center mt-4 pt-4 border-t border-slate-100 dark:border-white/10 transition-colors">
+            <span className="text-sm text-slate-600 dark:text-slate-400 transition-colors">¿No tienes cuenta? </span>
+            <Link href="/register" className="text-sm font-medium text-brand-primary hover:text-brand-primary/80 dark:text-brand-primary transition-colors">
+              Regístrate aquí
+            </Link>
           </div>
         </form>
       </div>

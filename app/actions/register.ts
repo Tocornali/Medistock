@@ -3,26 +3,19 @@
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { Role } from "@prisma/client"
+import { registerSchema } from "@/lib/validations/auth"
 
 export async function registerUser(formData: FormData) {
-  const name = formData.get("name") as string
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
-  const rut = formData.get("rut") as string
-  
-  const accountType = formData.get("accountType") as string
-  const razonSocial = formData.get("razonSocial") as string
-  const giro = formData.get("giro") as string
+  const data = Object.fromEntries(formData.entries())
+  const validation = registerSchema.safeParse(data)
 
+  if (!validation.success) {
+    const errorMsg = validation.error.issues[0].message
+    return { error: errorMsg }
+  }
+
+  const { name, email, password, rut, accountType, razonSocial, giro } = validation.data
   const role = accountType === "EMPRESA" ? Role.COMPANY : Role.USER
-
-  if (!name || !email || !password) {
-    return { error: "Todos los campos básicos son obligatorios" }
-  }
-
-  if (accountType === "EMPRESA" && (!rut || !razonSocial || !giro)) {
-    return { error: "Los datos de la empresa (RUT, Razón Social, Giro) son obligatorios" }
-  }
 
   // Verificar si el correo ya existe
   const existingUser = await prisma.user.findUnique({

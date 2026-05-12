@@ -1,33 +1,62 @@
-export const formatRut = (rut: string) => {
-  const cleanRut = rut.replace(/[^0-9kK]/g, '').toUpperCase();
-  if (cleanRut.length === 0) return '';
-  if (cleanRut.length <= 1) return cleanRut;
-  
-  let result = cleanRut.slice(-1);
-  let body = cleanRut.slice(0, -1);
-  
-  result = '-' + result;
-  while (body.length > 3) {
-    result = '.' + body.slice(-3) + result;
-    body = body.slice(0, -3);
-  }
-  result = body + result;
-  
-  return result;
+/**
+ * Utilidades para la validación y manejo de RUT chileno (Módulo 11)
+ */
+
+/**
+ * Limpia el RUT de puntos y guiones
+ */
+export function cleanRut(rut: string): string {
+  return rut.replace(/[^0-9kK]/g, '');
 }
 
-export const validateRut = (rut: string) => {
-  const cleanRut = rut.replace(/[^0-9kK]/g, '').toUpperCase();
-  if (cleanRut.length < 2) return false;
+/**
+ * Valida un RUT chileno usando el algoritmo Módulo 11
+ */
+export function validateRut(rut: string): boolean {
+  const clean = cleanRut(rut);
+  if (clean.length < 7 || clean.length > 9) return false;
 
-  const dv = cleanRut.slice(-1);
-  let rutBody = parseInt(cleanRut.slice(0, -1), 10);
+  const dv = clean.slice(-1).toUpperCase();
+  const corpo = clean.slice(0, -1);
 
-  let m = 0, s = 1;
-  for (; rutBody; rutBody = Math.floor(rutBody / 10)) {
-    s = (s + rutBody % 10 * (9 - m++ % 6)) % 11;
+  let suma = 0;
+  let multiplo = 2;
+
+  for (let i = corpo.length - 1; i >= 0; i--) {
+    suma += parseInt(corpo[i]) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
   }
-  const expectedDv = s ? String(s - 1) : 'K';
 
-  return expectedDv === dv;
+  const dvEsperado = 11 - (suma % 11);
+  let dvCalculado = '';
+
+  if (dvEsperado === 11) dvCalculado = '0';
+  else if (dvEsperado === 10) dvCalculado = 'K';
+  else dvCalculado = dvEsperado.toString();
+
+  return dv === dvCalculado;
+}
+
+/**
+ * Formatea un RUT con puntos y guion
+ */
+export function formatRut(rut: string): string {
+  const clean = cleanRut(rut);
+  if (!clean) return '';
+  
+  const dv = clean.slice(-1);
+  const corpo = clean.slice(0, -1);
+  
+  return corpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + dv;
+}
+
+/**
+ * Determina si el RUT es de Persona o Empresa
+ * En Chile, los RUT de empresas suelen ser mayores a 50.000.000
+ */
+export function getRutType(rut: string): 'PERSONA' | 'EMPRESA' {
+  const clean = cleanRut(rut);
+  const num = parseInt(clean.slice(0, -1));
+  
+  return num >= 50000000 ? 'EMPRESA' : 'PERSONA';
 }
