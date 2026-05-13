@@ -23,43 +23,58 @@ export const registerSchema = authSchema.extend({
   rut: z.string().optional(),
   razonSocial: z.string().optional(),
   giro: z.string().optional(),
-}).refine((data) => {
-  // Validación de campos obligatorios para Empresa
-  if (data.accountType === "EMPRESA") {
-    if (!data.rut || !data.razonSocial || !data.giro) return false;
-  }
-  return true;
-}, {
-  message: "Todos los campos de empresa son obligatorios para cuentas corporativas",
-  path: ["accountType"],
-}).refine((data) => {
-  // Validación de Módulo 11 si el RUT está presente
-  if (data.rut) {
-    return validateRut(data.rut);
-  }
-  return true;
-}, {
-  message: "El RUT ingresado no es válido (Módulo 11)",
-  path: ["rut"],
 }).superRefine((data, ctx) => {
-  // Discriminación de tipo de RUT
-  if (data.rut && validateRut(data.rut)) {
-    const type = getRutType(data.rut);
-    
-    if (data.accountType === "EMPRESA" && type !== "EMPRESA") {
+  // 1. Validación de campos obligatorios para Empresa
+  if (data.accountType === "EMPRESA") {
+    if (!data.rut) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Este formulario es exclusivo para RUTs de empresa (sobre 50M)",
+        message: "El RUT es obligatorio para empresas",
         path: ["rut"],
       });
     }
-    
-    if (data.accountType === "PERSONA" && type === "EMPRESA") {
+    if (!data.razonSocial) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Los RUT de empresa deben registrarse en el portal corporativo",
+        message: "La razón social es obligatoria",
+        path: ["razonSocial"],
+      });
+    }
+    if (!data.giro) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El giro es obligatorio",
+        path: ["giro"],
+      });
+    }
+  }
+
+  // 2. Validación de Módulo 11 y discriminación de tipo de RUT
+  if (data.rut) {
+    if (!validateRut(data.rut)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El RUT ingresado no es válido (Módulo 11)",
         path: ["rut"],
       });
+    } else {
+      const type = getRutType(data.rut);
+      
+      if (data.accountType === "EMPRESA" && type !== "EMPRESA") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Este formulario es exclusivo para RUTs de empresa (sobre 50M)",
+          path: ["rut"],
+        });
+      }
+      
+      if (data.accountType === "PERSONA" && type === "EMPRESA") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Los RUT de empresa deben registrarse en el portal corporativo",
+          path: ["rut"],
+        });
+      }
     }
   }
 });
