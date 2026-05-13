@@ -25,10 +25,10 @@ export default async function CheckoutExitoPage({
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-brand-dark transition-colors flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white transition-colors mb-4">Orden no encontrada</h1>
-        <p className="text-slate-600 dark:text-slate-400 transition-colors mb-8">No pudimos encontrar la información de tu compra.</p>
-        <Link href="/catalogo" className="bg-brand-primary hover:bg-[#1A9089] text-white font-bold py-3 px-6 rounded-xl transition-all">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-bold text-slate-800 mb-4">Orden no encontrada</h1>
+        <p className="text-slate-600 mb-8">No pudimos encontrar la información de tu compra.</p>
+        <Link href="/catalogo" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all">
           Volver al Catálogo
         </Link>
       </div>
@@ -36,13 +36,13 @@ export default async function CheckoutExitoPage({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark transition-colors flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       {order.estado === 'PAGADO' && <ClearCart />}
-      <div className="max-w-md w-full bg-white dark:bg-[#242729] rounded-3xl shadow-xl overflow-hidden border border-slate-100 dark:border-white/10">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
         
         {/* Encabezado Verde */}
         <div className="bg-green-500 p-8 text-center">
-          <div className="w-20 h-20 bg-white dark:bg-[#242729] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
             <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
             </svg>
@@ -53,11 +53,11 @@ export default async function CheckoutExitoPage({
 
         {/* Detalles del Recibo */}
         <div className="p-8">
-          <div className="bg-slate-50 dark:bg-brand-dark transition-colors rounded-2xl p-6 border border-slate-100 dark:border-white/10 mb-8">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-200 dark:border-white/10">
+          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8">
+            <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
               <span className="text-slate-500 text-sm font-semibold">Número de Orden</span>
               <div className="flex items-center">
-                <span className="text-slate-800 dark:text-white transition-colors font-mono font-bold text-sm bg-white dark:bg-[#242729] px-2 py-1 rounded shadow-sm">
+                <span className="text-slate-800 font-mono font-bold text-sm bg-white px-2 py-1 rounded shadow-sm">
                   #{order.id.slice(0, 8).toUpperCase()}
                 </span>
                 <CopyIdButton fullId={order.id} />
@@ -68,7 +68,7 @@ export default async function CheckoutExitoPage({
               <div className="flex justify-between items-start">
                 <span className="text-slate-500 text-sm font-semibold mt-0.5">Logística</span>
                 <div className="text-right max-w-[60%]">
-                  <span className="block text-slate-800 dark:text-white transition-colors font-bold">
+                  <span className="block text-slate-800 font-bold">
                     {order.deliveryMethod === 'DOMICILIO' ? 'Envío a Domicilio' : 'Retiro en Tienda'}
                   </span>
                   {order.deliveryMethod === 'DOMICILIO' && order.address && (
@@ -83,16 +83,16 @@ export default async function CheckoutExitoPage({
 
           {/* Detalle de la compra */}
           <div className="mb-6 px-2">
-            <h3 className="text-slate-800 dark:text-white transition-colors font-bold mb-3 text-sm uppercase tracking-wide">Detalle de la compra</h3>
+            <h3 className="text-slate-800 font-bold mb-3 text-sm uppercase tracking-wide">Detalle de la compra</h3>
             <div className="space-y-3 mb-4">
               {Array.isArray((order as any).cartItems) && ((order as any).cartItems).length > 0 ? (
                 ((order as any).cartItems).map((item: any, i: number) => (
                   <div key={i} className="flex justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400 transition-colors">
+                    <span className="text-slate-600">
                       <span className="font-bold mr-2">{item.cantidad}x</span> 
                       {item.nombre || item.product?.nombre || 'Producto'}
                     </span>
-                    <span className="text-slate-800 dark:text-white transition-colors font-medium">
+                    <span className="text-slate-800 font-medium">
                       {Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format((item.precio || 0) * item.cantidad)}
                     </span>
                   </div>
@@ -103,12 +103,12 @@ export default async function CheckoutExitoPage({
                 </div>
               )}
             </div>
-            <div className="border-b border-slate-200 dark:border-white/10"></div>
+            <div className="border-b border-slate-200"></div>
           </div>
 
-          <div className="flex items-center justify-between bg-blue-50 rounded-2xl p-6 mb-8 border border-brand-primary/10">
+          <div className="flex items-center justify-between bg-blue-50 rounded-2xl p-6 mb-8 border border-blue-100">
             <span className="text-blue-900 font-bold">Total Pagado</span>
-            <span className="text-2xl font-black text-[#1A9089] dark:text-brand-primary">
+            <span className="text-2xl font-black text-blue-700">
               {Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(order.total)}
             </span>
           </div>

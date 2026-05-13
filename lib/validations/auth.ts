@@ -41,20 +41,27 @@ export const registerSchema = authSchema.extend({
 }, {
   message: "El RUT ingresado no es válido (Módulo 11)",
   path: ["rut"],
-}).refine((data) => {
+}).superRefine((data, ctx) => {
   // Discriminación de tipo de RUT
   if (data.rut && validateRut(data.rut)) {
     const type = getRutType(data.rut);
-    if (data.accountType === "EMPRESA" && type !== "EMPRESA") return false;
-    if (data.accountType === "PERSONA" && type === "EMPRESA") return false;
+    
+    if (data.accountType === "EMPRESA" && type !== "EMPRESA") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Este formulario es exclusivo para RUTs de empresa (sobre 50M)",
+        path: ["rut"],
+      });
+    }
+    
+    if (data.accountType === "PERSONA" && type === "EMPRESA") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Los RUT de empresa deben registrarse en el portal corporativo",
+        path: ["rut"],
+      });
+    }
   }
-  return true;
-}, {
-  message: (data) => 
-    data.accountType === "EMPRESA" 
-      ? 'Este formulario es exclusivo para RUTs de empresa (sobre 50M)'
-      : 'Los RUT de empresa deben registrarse en el portal corporativo',
-  path: ["rut"],
 });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;
