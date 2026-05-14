@@ -54,9 +54,10 @@ export const registerSchema = authSchema.extend({
     if (!validateRut(data.rut)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "El RUT ingresado no es válido (Módulo 11)",
+        message: "RUT no válido",
         path: ["rut"],
       });
+
     } else {
       const type = getRutType(data.rut);
       

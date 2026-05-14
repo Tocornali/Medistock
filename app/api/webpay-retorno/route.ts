@@ -35,23 +35,24 @@ export async function GET(request: Request) {
             
             // 1. Check stock for all items
             for (const item of items) {
-              const dbProduct = await tx.product.findUnique({ where: { id: item.id } });
-              if (!dbProduct || dbProduct.stock_global < item.cantidad) {
+              const dbVariant = await tx.productVariant.findUnique({ where: { id: item.id } });
+              if (!dbVariant || dbVariant.stock < item.cantidad) {
                 throw new Error("INSUFFICIENT_STOCK");
               }
             }
 
             // 2. Decrement stock
             for (const item of items) {
-              await tx.product.update({
+              await tx.productVariant.update({
                 where: { id: item.id },
                 data: {
-                  stock_global: {
+                  stock: {
                     decrement: item.cantidad
                   }
                 }
               });
             }
+
 
             // 3. Mark as PAGADO
             await tx.order.update({

@@ -73,21 +73,15 @@ export default function RegisterPage() {
         setError(result.error)
         setPending(false)
       } else if (result?.success) {
-        // Auto-login tras el registro exitoso
-        const loginResult = await signIn("credentials", {
+        // Auto-login tras el registro exitoso utilizando el callbackUrl de NextAuth
+        await signIn("credentials", {
           email: data.email,
           password: data.password,
-          redirect: false
+          callbackUrl: "/catalogo"
         })
-
-        if (loginResult?.error) {
-          // Si el auto-login falla, mandamos a login manual
-          router.push("/login")
-        } else {
-          router.push("/")
-        }
       }
     } catch (err) {
+
       setError("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
       setPending(false)
     }

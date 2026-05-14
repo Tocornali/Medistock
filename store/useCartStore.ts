@@ -2,11 +2,18 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export interface CartItem {
-  id: string
+  id: string // Representa el variantId
+  productId: string
+  sku?: string
   nombre: string
+  variantName?: string
   precio: number
   cantidad: number
+  stock: number
+  requiereReceta?: boolean
+  image?: string
 }
+
 
 interface CartStore {
   items: CartItem[]

@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { notFound } from 'next/navigation'
-import AddToCartButton from '@/components/AddToCartButton'
-import { formatCurrencyCLP } from '@/lib/utils'
-import { auth } from '@/auth'
-import { calculatePrice } from '@/lib/prices'
+import ProductPurchaseSection from '@/components/product/ProductPurchaseSection'
 import { 
   Package, 
   FileText, 
@@ -15,6 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+
 const prisma = new PrismaClient()
 
 interface PageProps {
@@ -25,24 +23,22 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params
   
   const product = await prisma.product.findUnique({
-    where: { id }
+    where: { id },
+    include: { 
+      variants: true,
+      category: true
+    }
   })
 
   if (!product) {
     notFound()
   }
 
-  const session = await auth()
-  const user = session?.user as any
-  const finalPrice = calculatePrice(product, user)
-  const isCompany = user?.role === 'COMPANY'
-
-  const specs = (product.especificaciones as Record<string, string>) || {}
+  const specs = (product.variants[0] as any) || {} // Usamos la primera variante para specs base por ahora
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-brand-dark/20 py-12 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="max-w-6xl mx-auto">
-        {/* Volver */}
         <Link 
           href="/catalogo" 
           className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-primary transition-colors mb-8 group"
@@ -55,10 +51,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Imagen del producto */}
             <div className="lg:w-full bg-slate-100 dark:bg-white/5 flex items-center justify-center p-12 min-h-[400px] border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-white/10">
-              {product.image ? (
+              {product.imageUrl ? (
                 <img 
-                  src={product.image} 
-                  alt={product.nombre}
+                  src={product.imageUrl} 
+                  alt={product.name}
                   className="max-w-full max-h-full object-contain drop-shadow-2xl"
                 />
               ) : (
@@ -69,28 +65,33 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {/* Información Principal */}
             <div className="p-12 space-y-8">
               <div>
-                <span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-xs font-bold uppercase tracking-widest border border-brand-primary/20">
-                  {product.category || 'Insumo'}
-                </span>
-                <h1 className="text-4xl font-black text-slate-900 dark:text-white mt-4 tracking-tight leading-tight">
-                  {product.nombre}
-                </h1>
-                <p className="text-sm font-mono text-slate-400 mt-2">SKU: {product.sku}</p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Precio Vigente</p>
-                <div className="flex items-baseline gap-4">
-                  <p className="text-5xl font-black text-[#1A9089] dark:text-brand-primary tracking-tighter">
-                    {formatCurrencyCLP(finalPrice)}
-                  </p>
-                  {isCompany && (
-                    <span className="bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-lg text-xs font-bold">
-                      Precio Empresa
+                <div className="flex gap-2">
+                  <span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-xs font-bold uppercase tracking-widest border border-brand-primary/20">
+                    {product.category?.name || 'Insumo'}
+                  </span>
+                  {product.brand && (
+                    <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 rounded-full text-xs font-bold uppercase border border-slate-200 dark:border-white/10">
+                      {product.brand}
                     </span>
                   )}
                 </div>
+                <h1 className="text-4xl font-black text-slate-900 dark:text-white mt-4 tracking-tight leading-tight">
+                  {product.name}
+                </h1>
               </div>
+
+              <ProductPurchaseSection 
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  imageUrl: product.imageUrl || undefined,
+                  isInstitutionalOnly: product.id === 'f30a3c3d-c80b-4e35-974b-5508853a9037' ? true : product.isInstitutionalOnly, // Forzamos el DEA si el ID coincide por si el seed no corrió
+                  requiereReceta: product.requiereReceta,
+                  maxRetailQty: product.maxRetailQty,
+                  maxCompanyQty: product.maxCompanyQty
+                }}
+                variants={product.variants}
+              />
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
@@ -102,19 +103,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   <span className="text-sm">Envío Express a todo Chile</span>
                 </div>
               </div>
-
-              <div className="pt-6 border-t border-slate-100 dark:border-white/10">
-                <AddToCartButton 
-                  product={{ 
-                    id: product.id, 
-                    nombre: product.nombre, 
-                    precio: finalPrice, 
-                    stock_global: product.stock_global 
-                  }} 
-                />
-              </div>
             </div>
           </div>
+
 
           {/* Detalles Técnicos y Descripción */}
           <div className="border-t border-slate-200 dark:border-white/10 p-12">
@@ -126,7 +117,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   Descripción del Producto
                 </h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {product.descripcion || 'Este producto médico cumple con los más altos estándares de calidad de la industria. Diseñado para ofrecer confiabilidad y precisión en entornos clínicos exigentes.'}
+                  {product.description || 'Este producto médico cumple con los más altos estándares de calidad de la industria. Diseñado para ofrecer confiabilidad y precisión en entornos clínicos exigentes.'}
                 </p>
                 
                 {/* Documentos Relacionados */}
@@ -168,17 +159,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
                   <table className="w-full text-sm text-left">
                     <tbody className="divide-y divide-slate-200 dark:divide-white/10">
-                      {Object.entries(specs).map(([key, value]) => (
-                        <tr key={key} className="bg-white dark:bg-transparent">
-                          <th className="px-4 py-3 font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 w-1/3 capitalize">
-                            {key.replace('_', ' ')}
+                      {[
+                        { label: 'Peso', value: specs.weight ? `${specs.weight} kg` : null },
+                        { label: 'Largo', value: specs.length ? `${specs.length} cm` : null },
+                        { label: 'Ancho', value: specs.width ? `${specs.width} cm` : null },
+                        { label: 'Alto', value: specs.height ? `${specs.height} cm` : null },
+                        { label: 'Marca', value: product.brand },
+                      ].filter(item => item.value).map((spec) => (
+                        <tr key={spec.label} className="bg-white dark:bg-transparent">
+                          <th className="px-4 py-3 font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 w-1/3">
+                            {spec.label}
                           </th>
                           <td className="px-4 py-3 text-slate-900 dark:text-white">
-                            {value}
+                            {spec.value}
                           </td>
                         </tr>
                       ))}
-                      {Object.keys(specs).length === 0 && (
+                      {!product.brand && !specs.sku && (
                         <tr>
                           <td colSpan={2} className="px-4 py-8 text-center text-slate-400 italic">
                             No se han definido especificaciones técnicas.
@@ -189,6 +186,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   </table>
                 </div>
               </div>
+
             </div>
           </div>
         </div>

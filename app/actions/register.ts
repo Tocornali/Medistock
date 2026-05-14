@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { Role } from "@prisma/client"
 import { registerSchema } from "@/lib/validations/auth"
+import { signIn } from "@/auth"
 
 export async function registerUser(formData: FormData) {
   const data = Object.fromEntries(formData.entries())
@@ -55,8 +56,11 @@ export async function registerUser(formData: FormData) {
     })
     
     return { success: true }
+    
   } catch (error) {
     console.error("Error al registrar usuario:", error)
     return { error: "Ocurrió un error al intentar crear el usuario." }
   }
 }
+
+

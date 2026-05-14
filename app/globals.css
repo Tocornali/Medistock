@@ -56,3 +56,43 @@ select:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #1A1C1E inset !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+/* --- Scrollbar Personalizado MEDISTOCK --- */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-[#1A1C1E];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-white/10 rounded-full border-[3px] border-solid border-slate-100 dark:border-[#1A1C1E] hover:bg-brand-primary transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    @apply bg-brand-primary;
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #20B2AA transparent;
+  }
+}
+
+
+/* Eliminar flechas de inputs numéricos */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+

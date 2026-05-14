@@ -19,21 +19,27 @@ export default async function AdminDashboardPage() {
   const ventasTotales = ventasResult._sum.total || 0
 
   // 2. Órdenes Pendientes (Enviado o Procesando)
-  // Los estados reales en la base de datos podrían variar, usaremos los solicitados.
   const ordenesPendientes = await prisma.order.count({
     where: {
-      estado: { in: ['ENVIADO', 'PROCESANDO', 'PENDIENTE_PAGO', 'PENDING'] }
+      estado: { in: ['ENVIADO', 'PROCESANDO', 'PENDIENTE_PAGO', 'PENDING', 'PENDIENTE_APROBACION'] }
     }
   })
+
 
   // 3. Nuevos Clientes Empresa (Role: COMPANY)
   const nuevosClientesEmpresa = await prisma.user.count({
     where: { role: 'COMPANY' }
   })
 
-  // 4. Alertas de Stock (Productos con stock < 10)
+  // 4. Alertas de Stock (Productos con al menos una variante con stock < 10)
   const alertasStock = await prisma.product.count({
-    where: { stock_global: { lt: 10 } }
+    where: {
+      variants: {
+        some: {
+          stock: { lt: 10 }
+        }
+      }
+    }
   })
 
   // 5. Últimas 5 transacciones

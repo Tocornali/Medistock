@@ -16,6 +16,19 @@ enum Role {
   FINANCE
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+  PENDING_APPROVAL
+}
+
+enum PaymentMethod {
+  WEBPAY
+  INVOICE
+  TRANSFER
+}
+
 model User {
   id            String    @id @default(uuid())
   name          String?
@@ -69,17 +82,41 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  products Product[]
+}
+
 model Product {
-  id               String  @id @default(uuid())
-  sku              String  @unique
-  nombre           String
-  descripcion      String?
-  especificaciones Json?
-  precio           Float
-  companyPrice     Float?
-  stock_global     Int
-  category         String? @default("General")
-  image            String?
+  id                  String           @id @default(uuid())
+  name                String
+  description         String?
+  brand               String?
+  imageUrl            String?
+  categoryId          String?
+  category            Category?        @relation(fields: [categoryId], references: [id])
+  isInstitutionalOnly Boolean          @default(false)
+  requiereReceta      Boolean          @default(false)
+  maxRetailQty        Int              @default(10)
+  maxCompanyQty       Int              @default(100)
+  variants            ProductVariant[]
+}
+
+model ProductVariant {
+  id           String  @id @default(uuid())
+  productId    String
+  product      Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku          String  @unique
+  nameModifier String  // ej: 'Talla M', 'Caja x100'
+  price        Int
+  companyPrice Int
+  stock        Int
+  // Atributos Logísticos
+  weight       Float?  // kg
+  length       Float?  // cm
+  width        Float?  // cm
+  height       Float?  // cm
 }
 
 model Order {
@@ -93,7 +130,9 @@ model Order {
   deliverySpeed  String?
   address        String?
   shippingCost   Float?
-  paymentMethod  String?
+  paymentMethod  PaymentMethod @default(WEBPAY)
+  paymentStatus  PaymentStatus @default(PENDING)
+  documentUrl    String?
   cartItems      Json?
   
   user           User    @relation(fields: [userId], references: [id])

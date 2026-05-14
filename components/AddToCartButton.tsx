@@ -7,21 +7,32 @@ import { useRouter } from 'next/navigation'
 
 interface AddToCartButtonProps {
   product: {
-    id: string
+    id: string // variantId
+    productId: string
+    sku?: string
     nombre: string
+    variantName?: string
     precio: number
     stock_global: number
-  }
+    requiereReceta?: boolean
+    image?: string
+  },
+  quantity?: number
 }
 
-export default function AddToCartButton({ product }: AddToCartButtonProps) {
+
+export default function AddToCartButton({ product, quantity = 1 }: AddToCartButtonProps) {
   const addItem = useCartStore(state => state.addItem)
   const [isAdded, setIsAdded] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
 
   const handleAddToCart = () => {
-    addItem({ ...product, cantidad: 1 })
+    addItem({ 
+      ...product, 
+      stock: product.stock_global,
+      cantidad: quantity 
+    })
     setIsAdded(true)
     setTimeout(() => {
       setIsAdded(false)
