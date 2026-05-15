@@ -58,35 +58,54 @@ select:-webkit-autofill:focus {
 }
 /* --- Scrollbar Personalizado MEDISTOCK --- */
 @layer base {
-  ::-webkit-scrollbar {
+  /* Scrollbar principal para el documento */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
 
-  ::-webkit-scrollbar-track {
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
     @apply bg-slate-100 dark:bg-[#1A1C1E];
   }
 
-  ::-webkit-scrollbar-button {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-  }
-
-  ::-webkit-scrollbar-thumb {
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
     @apply bg-slate-300 dark:bg-white/10 rounded-full border-[3px] border-solid border-slate-100 dark:border-[#1A1C1E] hover:bg-brand-primary transition-colors;
   }
 
-  ::-webkit-scrollbar-thumb:active {
-    @apply bg-brand-primary;
-  }
-
-  /* Firefox support */
-  * {
+  /* Firefox support para el documento */
+  html, body {
     scrollbar-width: thin;
     scrollbar-color: #20B2AA transparent;
   }
 }
+
+/* Clase de utilidad para contenedores específicos con scroll */
+.custom-scrollbar {
+  scrollbar-gutter: auto; /* Cambiado de stable para evitar espacio reservado si no hay scroll */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-300/50 dark:bg-white/10 rounded-full hover:bg-brand-primary transition-colors;
+}
+
+/* Firefox para .custom-scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 178, 170, 0.3) transparent;
+}
+
 
 
 /* Eliminar flechas de inputs numéricos */

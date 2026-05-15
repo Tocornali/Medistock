@@ -85,7 +85,7 @@ export default function CarritoPage() {
 
   if (items.length === 0 && !webpayData) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-brand-dark/20 flex flex-col items-center justify-center p-4 transition-colors">
+      <div className="min-h-[calc(100vh-64px)] bg-slate-50 dark:bg-brand-dark/20 flex flex-col items-center justify-center p-4 transition-colors">
         <div className="bg-white dark:bg-[#242729] rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-white/10 p-12 text-center max-w-md w-full shadow-2xl">
           <div className="w-24 h-24 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -158,7 +158,7 @@ export default function CarritoPage() {
 
   if (webpayData) {
     return (
-      <div className="min-h-screen bg-[#0F1113] flex items-center justify-center text-white">
+      <div className="min-h-[calc(100vh-64px)] bg-[#0F1113] flex items-center justify-center text-white">
         <form ref={formRef} action={webpayData.url} method="POST">
           <input type="hidden" name="token_ws" value={webpayData.token} />
           <p className="animate-pulse">Redirigiendo a Webpay...</p>
@@ -168,7 +168,7 @@ export default function CarritoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark/20 text-slate-900 dark:text-white p-4 lg:p-12 font-sans selection:bg-brand-primary/30 transition-colors">
+    <div className="min-h-[calc(100vh-64px)] bg-slate-50 dark:bg-brand-dark/20 text-slate-900 dark:text-white p-4 lg:p-12 font-sans selection:bg-brand-primary/30 transition-colors overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
@@ -280,7 +280,7 @@ export default function CarritoPage() {
             )}
 
             {currentStep === 2 && (
-              <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
                 <button 
                   onClick={handlePrevStep} 
                   className="flex items-center gap-2 text-slate-400 hover:text-brand-primary font-bold text-[10px] uppercase tracking-[0.2em] transition-all group w-fit"
@@ -396,7 +396,7 @@ export default function CarritoPage() {
 
             {/* PASO 3: MÉTODO DE PAGO */}
             {currentStep === 3 && (
-              <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
                 <button 
                   onClick={handlePrevStep} 
                   className="flex items-center gap-2 text-slate-400 hover:text-brand-primary font-bold text-[10px] uppercase tracking-[0.2em] transition-all group w-fit"
