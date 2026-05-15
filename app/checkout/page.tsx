@@ -422,11 +422,11 @@ export default function CheckoutPage() {
               <div className="space-y-6 animate-fade-in">
                 <div className="bg-white dark:bg-[#242729] p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-white/10">
                   <PaymentSelector 
-                    accountType={accountType} 
-                    onSelect={(method, file) => {
-                      setPaymentMethod(method);
-                      setOcFile(file || null);
-                    }} 
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={setPaymentMethod}
+                    ocFile={ocFile}
+                    setOcFile={setOcFile}
+                    isCompany={session?.user?.role === 'COMPANY'}
                   />
                 </div>
 
