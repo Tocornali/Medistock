@@ -67,6 +67,12 @@ select:-webkit-autofill:focus {
     @apply bg-slate-100 dark:bg-[#1A1C1E];
   }
 
+  ::-webkit-scrollbar-button {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-slate-300 dark:bg-white/10 rounded-full border-[3px] border-solid border-slate-100 dark:border-[#1A1C1E] hover:bg-brand-primary transition-colors;
   }

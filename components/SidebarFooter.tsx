@@ -1,9 +1,10 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LogOut, Settings } from "lucide-react"
+import { LogOut, Settings, Loader2 } from "lucide-react"
 
 interface SidebarFooterProps {
   user: {
@@ -14,9 +15,14 @@ interface SidebarFooterProps {
 
 export default function SidebarFooter({ user }: SidebarFooterProps) {
   const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" })
+  const handleLogout = () => {
+    setIsLoggingOut(true)
+    startTransition(async () => {
+      await signOut({ callbackUrl: "/login" })
+    })
   }
 
   return (
@@ -48,10 +54,17 @@ export default function SidebarFooter({ user }: SidebarFooterProps) {
         
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group cursor-pointer"
+          disabled={isLoggingOut || isPending}
+          className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group cursor-pointer disabled:opacity-50"
         >
-          <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Cerrar Sesión</span>
+          {isLoggingOut || isPending ? (
+            <Loader2 className="w-5 h-5 animate-spin text-red-400" />
+          ) : (
+            <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          )}
+          <span className="text-sm font-medium">
+            {isLoggingOut || isPending ? "Cerrando sesión..." : "Cerrar Sesión"}
+          </span>
         </button>
       </div>
     </div>

@@ -1,17 +1,23 @@
-
 "use client";
 
-import { useState } from "react";
-import { CreditCard, FileText, Upload, CheckCircle2 } from "lucide-react";
+import { CreditCard, FileText, Upload, CheckCircle2, Banknote } from "lucide-react";
+import { PaymentMethod } from "@prisma/client";
 
 interface PaymentSelectorProps {
-  accountType: "PERSONA" | "EMPRESA";
-  onSelect: (method: "WEBPAY" | "INVOICE", file?: File) => void;
+  paymentMethod: PaymentMethod;
+  setPaymentMethod: (method: PaymentMethod) => void;
+  ocFile: File | null;
+  setOcFile: (file: File | null) => void;
+  isCompany: boolean;
 }
 
-export default function PaymentSelector({ accountType, onSelect }: PaymentSelectorProps) {
-  const [selectedMethod, setSelectedMethod] = useState<"WEBPAY" | "INVOICE">("WEBPAY");
-  const [ocFile, setOcFile] = useState<File | null>(null);
+export default function PaymentSelector({ 
+  paymentMethod, 
+  setPaymentMethod, 
+  ocFile, 
+  setOcFile, 
+  isCompany 
+}: PaymentSelectorProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -21,72 +27,86 @@ export default function PaymentSelector({ accountType, onSelect }: PaymentSelect
         return;
       }
       setOcFile(file);
-      onSelect(selectedMethod, file);
     }
   };
 
-  const handleMethodChange = (method: "WEBPAY" | "INVOICE") => {
-    setSelectedMethod(method);
-    onSelect(method, ocFile || undefined);
-  };
-
   return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-bold text-slate-800 dark:text-white transition-colors">
-        Método de Pago
-      </h3>
-
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Opción Webpay (Disponible para todos) */}
-        <label
-          className={`relative flex flex-col p-5 border-2 rounded-2xl cursor-pointer transition-all ${
-            selectedMethod === "WEBPAY"
-              ? "border-brand-primary bg-blue-50/30 shadow-md"
+        {/* Opción Webpay */}
+        <button
+          type="button"
+          className={`relative flex flex-col p-6 border-2 rounded-[2rem] transition-all text-left ${
+            paymentMethod === PaymentMethod.WEBPAY
+              ? "border-brand-primary bg-brand-primary/5 shadow-md"
               : "border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5"
           }`}
-          onClick={() => handleMethodChange("WEBPAY")}
+          onClick={() => setPaymentMethod(PaymentMethod.WEBPAY)}
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+            <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl">
               <CreditCard className="w-6 h-6" />
             </div>
-            {selectedMethod === "WEBPAY" && <CheckCircle2 className="w-5 h-5 text-brand-primary" />}
+            {paymentMethod === PaymentMethod.WEBPAY && <CheckCircle2 className="w-6 h-6 text-brand-primary fill-brand-primary/10" />}
           </div>
-          <span className="font-bold text-slate-900 dark:text-white">Pago Seguro Webpay</span>
-          <span className="text-xs text-slate-500 mt-1">Débito o Crédito</span>
-        </label>
+          <span className="font-black text-slate-900 dark:text-white text-lg">Webpay Plus</span>
+          <span className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">Tarjeta de Débito / Crédito</span>
+        </button>
 
-        {/* Opción Factura (Solo Empresas) */}
-        {accountType === "EMPRESA" && (
-          <label
-            className={`relative flex flex-col p-5 border-2 rounded-2xl cursor-pointer transition-all ${
-              selectedMethod === "INVOICE"
-                ? "border-brand-primary bg-blue-50/30 shadow-md"
+        {/* Opción Transferencia */}
+        <button
+          type="button"
+          className={`relative flex flex-col p-6 border-2 rounded-[2rem] transition-all text-left ${
+            paymentMethod === PaymentMethod.TRANSFER
+              ? "border-brand-primary bg-brand-primary/5 shadow-md"
+              : "border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5"
+          }`}
+          onClick={() => setPaymentMethod(PaymentMethod.TRANSFER)}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-blue-500/10 text-blue-500 rounded-2xl">
+              <Banknote className="w-6 h-6" />
+            </div>
+            {paymentMethod === PaymentMethod.TRANSFER && <CheckCircle2 className="w-6 h-6 text-brand-primary fill-brand-primary/10" />}
+          </div>
+          <span className="font-black text-slate-900 dark:text-white text-lg">Transferencia Bancaria</span>
+          <span className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">Aprobación Manual</span>
+        </button>
+
+        {/* Opción Orden de Compra (Solo B2B) */}
+        {isCompany && (
+          <button
+            type="button"
+            className={`relative flex flex-col p-6 border-2 rounded-[2rem] transition-all text-left ${
+              paymentMethod === PaymentMethod.INVOICE
+                ? "border-brand-primary bg-brand-primary/5 shadow-md"
                 : "border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5"
             }`}
-            onClick={() => handleMethodChange("INVOICE")}
+            onClick={() => setPaymentMethod(PaymentMethod.INVOICE)}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+              <div className="p-3 bg-amber-500/10 text-amber-500 rounded-2xl">
                 <FileText className="w-6 h-6" />
               </div>
-              {selectedMethod === "INVOICE" && <CheckCircle2 className="w-5 h-5 text-brand-primary" />}
+              {paymentMethod === PaymentMethod.INVOICE && <CheckCircle2 className="w-6 h-6 text-brand-primary fill-brand-primary/10" />}
             </div>
-            <span className="font-bold text-slate-900 dark:text-white">Facturación a 30 días</span>
-            <span className="text-xs text-slate-500 mt-1">Exclusivo B2B</span>
-          </label>
+            <span className="font-black text-slate-900 dark:text-white text-lg">Orden de Compra</span>
+            <span className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">Pago a 30 días</span>
+          </button>
         )}
       </div>
 
-      {/* Subida de OC para Empresas con Factura seleccionada */}
-      {selectedMethod === "INVOICE" && accountType === "EMPRESA" && (
-        <div className="mt-6 p-6 bg-slate-50 dark:bg-black/20 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10">
+      {/* Subida de OC para Empresas con OC seleccionado */}
+      {paymentMethod === PaymentMethod.INVOICE && isCompany && (
+        <div className="mt-6 p-8 bg-slate-50 dark:bg-black/20 rounded-[2.5rem] border-2 border-dashed border-slate-300 dark:border-white/10 animate-in zoom-in-95 duration-300">
           <div className="flex flex-col items-center text-center">
-            <Upload className="w-8 h-8 text-slate-400 mb-3" />
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              Sube tu Orden de Compra (PDF)
+            <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Upload className="w-8 h-8 text-brand-primary" />
+            </div>
+            <p className="text-lg font-black text-slate-900 dark:text-white mb-1">
+              {ocFile ? "Documento Cargado" : "Sube tu Orden de Compra (PDF)"}
             </p>
-            <p className="text-xs text-slate-500 mb-4">Documento obligatorio para procesar la factura</p>
+            <p className="text-sm text-slate-500 mb-6">Documento obligatorio para procesar el pedido B2B</p>
             
             <input
               type="file"
@@ -97,14 +117,14 @@ export default function PaymentSelector({ accountType, onSelect }: PaymentSelect
             />
             <label
               htmlFor="oc-upload"
-              className="px-6 py-2 bg-white dark:bg-[#242729] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-700 dark:text-white cursor-pointer hover:bg-slate-50 transition-colors"
+              className="px-8 py-3 bg-brand-primary hover:bg-[#1A9089] rounded-xl text-sm font-black text-white cursor-pointer transition-all shadow-lg shadow-brand-primary/10 active:scale-95"
             >
               {ocFile ? "Cambiar Archivo" : "Seleccionar PDF"}
             </label>
             
             {ocFile && (
-              <div className="mt-4 flex items-center space-x-2 text-emerald-500">
-                <FileText className="w-4 h-4" />
+              <div className="mt-6 flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600">
+                <CheckCircle2 className="w-4 h-4" />
                 <span className="text-xs font-bold truncate max-w-[200px]">{ocFile.name}</span>
               </div>
             )}
@@ -114,3 +134,4 @@ export default function PaymentSelector({ accountType, onSelect }: PaymentSelect
     </div>
   );
 }
+
