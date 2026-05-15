@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
   // Lógica de Anulación: Si existe TBK_TOKEN o no existe token_ws, el usuario canceló
   if (TBK_TOKEN || !token_ws) {
-    return NextResponse.redirect(new URL('/carrito', getBaseUrl()));
+    return NextResponse.redirect(new URL('/checkout/error?error=cancelado', getBaseUrl()));
   }
 
   // Lógica de Confirmación (Commit)
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
               where: { id: order.id },
               data: { estado: 'ERROR_STOCK' }
             });
-            return NextResponse.redirect(new URL('/carrito?error=stock', getBaseUrl()));
+            return NextResponse.redirect(new URL(`/checkout/error?error=stock&orden=${order.id}`, getBaseUrl()));
           }
           throw error;
         }
@@ -75,11 +75,11 @@ export async function GET(request: Request) {
       // Redirección Final al éxito
       return NextResponse.redirect(new URL(`/checkout/exito?orden=${response.buy_order}`, getBaseUrl()));
     } else {
-      // Si la autorización falla, redirigimos al carrito
-      return NextResponse.redirect(new URL('/carrito?error=rechazado', getBaseUrl()));
+      // Si la autorización falla, redirigimos a la vista de error
+      return NextResponse.redirect(new URL(`/checkout/error?error=rechazado&orden=${response.buy_order}`, getBaseUrl()));
     }
   } catch (error) {
     console.error("Error al confirmar transacción de Transbank:", error);
-    return NextResponse.redirect(new URL('/carrito?error=excepcion', getBaseUrl()));
+    return NextResponse.redirect(new URL('/checkout/error?error=excepcion', getBaseUrl()));
   }
 }

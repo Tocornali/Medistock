@@ -115,7 +115,13 @@ export default function CarritoPage() {
 
   const handleNextStep = async () => {
     if (currentStep === 2) {
-      const isValid = await trigger();
+      // Si es retiro en tienda, solo validamos nombre y teléfono.
+      // Si es domicilio, validamos todo (undefined = todo).
+      const fieldsToValidate: any = deliveryMethod === 'RETIRO' 
+        ? ['nombre', 'telefono'] 
+        : undefined;
+        
+      const isValid = await trigger(fieldsToValidate);
       if (!isValid) return;
     }
     if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3)
@@ -141,7 +147,6 @@ export default function CarritoPage() {
         paymentMethod,
       } as any)
       if (result.success) {
-        clearCart()
         if (result.type === 'WEBPAY') setWebpayData({ url: result.url, token: result.token })
         else if (result.redirectUrl) router.push(result.redirectUrl)
       }

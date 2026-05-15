@@ -11,8 +11,9 @@ export const shippingSchema = z.object({
   }),
   comuna: z.string().min(1, "La comuna es obligatoria"),
 }).refine((data) => {
+  if (!data.region || !data.comuna) return true;
   const region = CHILE_DATA.find(r => r.name === data.region);
-  return region?.comunas.includes(data.comuna);
+  return region ? region.comunas.includes(data.comuna) : false;
 }, {
   message: "La comuna no pertenece a la región seleccionada",
   path: ["comuna"],
