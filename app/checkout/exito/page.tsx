@@ -90,7 +90,7 @@ export default async function CheckoutExitoPage({
                   <div key={i} className="flex justify-between text-sm">
                     <span className="text-slate-600">
                       <span className="font-bold mr-2">{item.cantidad}x</span> 
-                      {item.nombre || item.product?.nombre || 'Producto'}
+                      {item.nombre || item.product?.name || 'Producto'}
                     </span>
                     <span className="text-slate-800 font-medium">
                       {Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format((item.precio || 0) * item.cantidad)}
