@@ -46,6 +46,7 @@ export default function CarritoPage() {
     formState: { errors }
   } = useForm<ShippingFormData>({
     resolver: zodResolver(shippingSchema),
+    mode: 'onChange',
     defaultValues: {
       nombre: session?.user?.name || '',
       telefono: '+56 9',
@@ -64,6 +65,7 @@ export default function CarritoPage() {
   }, [session, setValue]);
 
   const selectedRegionName = watch('region');
+  const selectedComunaName = watch('comuna');
   const comunasDisponibles = CHILE_DATA.find(r => r.name === selectedRegionName)?.comunas || [];
 
   // Resetear comuna si cambia la región
@@ -148,12 +150,31 @@ export default function CarritoPage() {
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    if (!value.startsWith('+56 ')) {
-      value = '+56 ' + value.replace(/^\+56\s?/, '');
+    
+    // Si el valor está vacío, dejar solo el prefijo
+    if (!value) {
+      setValue('telefono', '+56 ', { shouldValidate: true });
+      return;
     }
-    // Permitir solo 9 dígitos después del +56 (incluyendo el 9)
-    const numbers = value.slice(4).replace(/\D/g, '').slice(0, 9);
-    setValue('telefono', '+56 ' + numbers);
+
+    // Extraer solo los números del string completo
+    const numbers = value.replace(/\D/g, '');
+    
+    // Si empieza con 56, quitarlo para normalizar
+    let cleanNumbers = numbers;
+    if (cleanNumbers.startsWith('56')) {
+      cleanNumbers = cleanNumbers.slice(2);
+    }
+    
+    // Quedarse solo con los primeros 9 dígitos (el 9 + 8 restantes)
+    const finalNumbers = cleanNumbers.slice(0, 9);
+    
+    // Formatear siempre como +56 XXXXXXXXX
+    setValue('telefono', finalNumbers ? `+56 ${finalNumbers}` : '+56 ', { 
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
   };
 
   if (webpayData) {
@@ -323,28 +344,6 @@ export default function CarritoPage() {
                 {deliveryMethod === 'DOMICILIO' && (
                   <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-white/5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Calle</label>
-                        <input 
-                          type="text" 
-                          {...register('calle')}
-                          placeholder="Av. Providencia" 
-                          className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.calle ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold`} 
-                        />
-                        {errors.calle && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.calle.message}</p>}
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Número / Depto</label>
-                        <input 
-                          type="text" 
-                          {...register('numeroCalle')}
-                          placeholder="1234, Oficina 501" 
-                          className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.numeroCalle ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold`} 
-                        />
-                        {errors.numeroCalle && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.numeroCalle.message}</p>}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <Controller
                         name="region"
                         control={control}
@@ -380,6 +379,30 @@ export default function CarritoPage() {
                           </div>
                         )}
                       />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Calle</label>
+                        <input 
+                          type="text" 
+                          {...register('calle')}
+                          disabled={!selectedRegionName || !selectedComunaName}
+                          placeholder="Av. Providencia" 
+                          className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.calle ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed`} 
+                        />
+                        {errors.calle && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.calle.message}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Número / Depto</label>
+                        <input 
+                          type="text" 
+                          {...register('numeroCalle')}
+                          disabled={!selectedRegionName || !selectedComunaName}
+                          placeholder="1234, Oficina 501" 
+                          className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.numeroCalle ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed`} 
+                        />
+                        {errors.numeroCalle && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.numeroCalle.message}</p>}
+                      </div>
                     </div>
                   </div>
                 )}
