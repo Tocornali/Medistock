@@ -38,6 +38,12 @@ export default function SidebarNav({ role }: { role: string }) {
       roles: ['ADMIN']
     },
     {
+      href: "/dashboard/admin/usuarios",
+      label: "Gestión de Clientes",
+      icon: Users,
+      roles: ['ADMIN']
+    },
+    {
       href: "/mis-ordenes",
       label: "Mis Órdenes",
       icon: ShoppingCart,

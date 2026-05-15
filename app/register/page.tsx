@@ -186,6 +186,16 @@ export default function RegisterPage() {
                     </svg>
                   )}
                 </button>
+                {capsLockActive && (
+                  <div 
+                    className="absolute inset-y-0 right-10 flex items-center pointer-events-none"
+                    title="Bloq Mayús está activado"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-brand-primary/80 dark:text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                  </div>
+                )}
               </div>
               {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
             </div>
