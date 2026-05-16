@@ -15,14 +15,16 @@ import { shippingSchema, type ShippingFormData } from '@/lib/validations/checkou
 import { CHILE_DATA } from '@/lib/chile-data'
 import { ChevronLeft, Check } from 'lucide-react'
 import CustomSelect from '@/components/ui/Select'
+import PurchaseOrderForm from '@/components/checkout/PurchaseOrderForm'
 
 export default function CarritoPage() {
   const router = useRouter()
   const { data: session } = useSession()
+  const isCompany = session?.user?.role === 'COMPANY'
   const { items, updateQuantity, removeItem, clearCart } = useCartStore()
 
   const [mounted, setMounted] = useState(false)
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1)
 
   const [webpayData, setWebpayData] = useState<{ url: string, token: string } | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -53,7 +55,8 @@ export default function CarritoPage() {
       region: '',
       comuna: '',
       calle: '',
-      numeroCalle: ''
+      numeroCalle: '',
+      instrucciones: ''
     }
   })
 
@@ -112,6 +115,7 @@ export default function CarritoPage() {
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
   const shippingCost = deliveryMethod === 'RETIRO' ? 0 : (isFreeShipping ? 0 : (deliverySpeed === 'PRIORITARIO' ? 7000 : 3000))
   const totalConIva = (subtotal + shippingCost) * 1.19
+  const montoIva = (subtotal + shippingCost) * 0.19
 
   const handleNextStep = async () => {
     if (currentStep === 2) {
@@ -124,11 +128,11 @@ export default function CarritoPage() {
       const isValid = await trigger(fieldsToValidate);
       if (!isValid) return;
     }
-    if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3)
+    if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3 | 4)
   }
 
   const handlePrevStep = () => {
-    if (currentStep > 1) setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3)
+    if (currentStep > 1) setCurrentStep((prev) => (prev - 1) as 1 | 2 | 3 | 4)
   }
 
   const handleConfirmOrder = async () => {
@@ -147,8 +151,11 @@ export default function CarritoPage() {
         paymentMethod,
       } as any)
       if (result.success) {
-        if (result.type === 'WEBPAY') setWebpayData({ url: result.url, token: result.token })
-        else if (result.redirectUrl) router.push(result.redirectUrl)
+        if (result.type === 'WEBPAY') {
+          setWebpayData({ url: result.url, token: result.token })
+        } else if (result.redirectUrl) {
+          router.push(result.redirectUrl)
+        }
       }
     } catch (e) { alert("Error al procesar pedido") } finally { setIsProcessing(false) }
   }
@@ -323,18 +330,24 @@ export default function CarritoPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nombre de Contacto</label>
+                  <div>
+                    <div className="min-h-[36px] flex items-end mb-2">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-normal">
+                        {isCompany ? 'Nombre de Quién Recibe (Bodega / Recepción)' : 'Nombre de Contacto'}
+                      </label>
+                    </div>
                     <input 
                       type="text" 
                       {...register('nombre')}
-                      placeholder="Ej: Juan Pérez" 
+                      placeholder={isCompany ? 'Ej: Juan Pérez (Encargado de Adquisiciones)' : 'Ej: Juan Pérez'} 
                       className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.nombre ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold`} 
                     />
-                    {errors.nombre && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.nombre.message}</p>}
+                    {errors.nombre && <p className="text-red-500 text-[10px] font-bold uppercase mt-1">{errors.nombre.message}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Teléfono</label>
+                  <div>
+                    <div className="min-h-[36px] flex items-end mb-2">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-normal">Teléfono</label>
+                    </div>
                     <input 
                       type="text" 
                       {...register('telefono')}
@@ -342,7 +355,7 @@ export default function CarritoPage() {
                       placeholder="+56 9 1234 5678" 
                       className={`w-full bg-slate-50 dark:bg-white/5 border ${errors.telefono ? 'border-red-500' : 'border-slate-200 dark:border-white/10'} rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-bold`} 
                     />
-                    {errors.telefono && <p className="text-red-500 text-[10px] font-bold uppercase">{errors.telefono.message}</p>}
+                    {errors.telefono && <p className="text-red-500 text-[10px] font-bold uppercase mt-1">{errors.telefono.message}</p>}
                   </div>
                 </div>
 
@@ -419,6 +432,29 @@ export default function CarritoPage() {
                     <p className="text-[10px] text-brand-primary font-bold mt-4 uppercase tracking-widest">Horario: Lun a Vie 09:00 - 18:00</p>
                   </div>
                 )}
+
+                {/* INSTRUCCIONES DE ENTREGA Y HORARIOS DE BODEGA */}
+                <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-white/5">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    {isCompany ? 'Instrucciones de Entrega o Horarios de Bodega' : 'Instrucciones Adicionales para el Despacho'}
+                  </label>
+                  <textarea 
+                    {...register('instrucciones')}
+                    rows={3}
+                    placeholder={isCompany ? 'Ej: Recibir solo de lunes a miércoles de 09:00 a 13:00 hrs. Entrar por acceso de carga posterior' : 'Ej: Dejar en conserjería'} 
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-brand-primary transition-all font-medium text-sm resize-none" 
+                  />
+                </div>
+
+                {/* ADVERTENCIA LEGAL B2B */}
+                {isCompany && (
+                  <div className="bg-slate-100 dark:bg-[#1A1C1E] border border-slate-200 dark:border-white/5 rounded-2xl p-5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium flex items-start gap-3 shadow-inner">
+                    <div className="w-2 h-2 bg-brand-primary rounded-full mt-1.5 flex-shrink-0" />
+                    <p>
+                      <strong className="text-slate-700 dark:text-slate-300 font-bold">Nota:</strong> Esta dirección se utilizará exclusivamente para la Guía de Despacho física y la entrega de cajas. La Factura Electrónica se emitirá usando la Dirección Fiscal registrada en su perfil de empresa.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -446,6 +482,33 @@ export default function CarritoPage() {
                   ocFile={ocFile}
                   setOcFile={setOcFile}
                   isCompany={session?.user?.role === 'COMPANY'}
+                />
+              </div>
+            )}
+
+            {/* PASO 4: ORDEN DE COMPRA (SOLO B2B) */}
+            {currentStep === 4 && (
+              <div className="bg-white dark:bg-[#242729] rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-xl p-10 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
+                <button 
+                  onClick={() => setCurrentStep(3)} 
+                  className="flex items-center gap-2 text-slate-400 hover:text-brand-primary font-bold text-[10px] uppercase tracking-[0.2em] transition-all group w-fit"
+                >
+                  <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:border-brand-primary transition-colors">
+                    <ChevronLeft className="w-4 h-4" />
+                  </div>
+                  Volver a Método de Pago
+                </button>
+
+                <div>
+                  <h2 className="text-3xl font-black tracking-tight mb-2">Validación de Orden de Compra</h2>
+                  <p className="text-slate-500 dark:text-slate-400">Sube el documento oficial emitido por tu institución para completar el pedido.</p>
+                </div>
+
+                <PurchaseOrderForm 
+                  cartTotal={totalConIva} 
+                  onComplete={(orderId) => {
+                    router.push(`/checkout/exito?orden=${orderId}&method=oc`);
+                  }} 
                 />
               </div>
             )}
@@ -482,14 +545,18 @@ export default function CarritoPage() {
 
               <div className="space-y-6 mb-10">
                 <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                  <span className="text-base font-bold">Subtotal</span>
+                  <span className="text-base font-bold">Subtotal Neto (Sin IVA)</span>
                   <span className="text-xl font-black text-slate-900 dark:text-white">{formatCurrencyCLP(subtotal)}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-8 text-slate-600 dark:text-slate-400">
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
                   <span className="text-base font-bold">Envío</span>
                   <span className={`text-xl font-black ${shippingCost === 0 ? 'text-brand-primary' : 'text-slate-900 dark:text-white'}`}>
                     {shippingCost === 0 ? 'Gratis' : formatCurrencyCLP(shippingCost)}
                   </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-100 dark:border-white/5 pb-8 text-slate-600 dark:text-slate-400">
+                  <span className="text-base font-bold">IVA (19%)</span>
+                  <span className="text-xl font-black text-slate-900 dark:text-white">{formatCurrencyCLP(montoIva)}</span>
                 </div>
               </div>
 
@@ -498,22 +565,34 @@ export default function CarritoPage() {
                   <span className="text-lg font-bold text-slate-400 uppercase tracking-widest">Total</span>
                   <span className="text-5xl font-black text-brand-primary tracking-tighter">{formatCurrencyCLP(totalConIva)}</span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase text-right tracking-[0.2em]">IVA (19%) Incluido</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase text-right tracking-[0.2em]">Total Facturado</p>
               </div>
 
               {/* BOTONES DE PASOS */}
               <div className="space-y-4">
-                {currentStep < 3 ? (
-                  <button onClick={handleNextStep} className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-black py-6 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-4 text-xl group active:scale-[0.98]">
+                {currentStep === 4 ? (
+                  <div className="bg-brand-primary/5 border border-brand-primary/20 rounded-2xl p-6 text-center animate-in fade-in duration-500">
+                    <p className="text-sm font-bold text-slate-800 dark:text-white">Formulario Activo</p>
+                    <p className="text-xs text-slate-500 mt-1">Completa los datos de tu Orden de Compra en el panel principal para finalizar el pedido.</p>
+                  </div>
+                ) : currentStep < 3 ? (
+                  <button onClick={handleNextStep} className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-black py-5 px-4 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-2 text-sm lg:text-base group active:scale-[0.98]">
                     <span>Continuar</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
+                ) : paymentMethod === PaymentMethod.PURCHASE_ORDER ? (
+                  <button onClick={() => setCurrentStep(4)} className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-black py-5 px-4 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-2 text-sm lg:text-base group active:scale-[0.98]">
+                    <span>Subir Orden de Compra</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0 group-hover:translate-x-2 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </button>
                 ) : (
-                  <button onClick={handleConfirmOrder} disabled={isProcessing} className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-black py-6 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-4 text-xl group disabled:opacity-30 active:scale-[0.98]">
+                  <button onClick={handleConfirmOrder} disabled={isProcessing} className="w-full bg-brand-primary hover:bg-[#1A9089] text-white font-black py-5 px-4 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-2 text-sm lg:text-base group disabled:opacity-30 active:scale-[0.98]">
                     <span>{isProcessing ? 'Procesando...' : 'Pagar Pedido'}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 group-hover:scale-110 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                   </button>

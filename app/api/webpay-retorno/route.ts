@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { webpayTransaction as tx } from '@/lib/transbank'
 import { getBaseUrl } from '@/lib/utils'
+import { OrderStatus, PaymentStatus } from '@prisma/client'
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -54,17 +55,20 @@ export async function GET(request: Request) {
             }
 
 
-            // 3. Mark as PAGADO
+            // 3. Mark as PAID
             await tx.order.update({
               where: { id: order.id },
-              data: { estado: 'PAGADO' }
+              data: { 
+                estado: OrderStatus.PAID,
+                paymentStatus: PaymentStatus.PAID 
+              }
             });
           });
         } catch (error: any) {
           if (error.message === "INSUFFICIENT_STOCK") {
             await prisma.order.update({
               where: { id: order.id },
-              data: { estado: 'ERROR_STOCK' }
+              data: { paymentStatus: PaymentStatus.CANCELLED }
             });
             return NextResponse.redirect(new URL(`/checkout/error?error=stock&orden=${order.id}`, getBaseUrl()));
           }

@@ -26,7 +26,16 @@ enum PaymentStatus {
 enum PaymentMethod {
   WEBPAY
   INVOICE
+  PURCHASE_ORDER
   TRANSFER
+}
+
+enum OrderStatus {
+  PENDING_OC_VALIDATION
+  OC_APPROVED
+  SHIPPED
+  INVOICED
+  PAID
 }
 
 model User {
@@ -120,11 +129,11 @@ model ProductVariant {
 }
 
 model Order {
-  id             String   @id @default(uuid())
+  id             String        @id @default(uuid())
   userId         String
   total          Float
-  estado         String   @default("PENDING")
-  createdAt      DateTime @default(now())
+  estado         OrderStatus   @default(PENDING_OC_VALIDATION) // Cambiado a Enum
+  createdAt      DateTime      @default(now())
   
   deliveryMethod String?
   deliverySpeed  String?
@@ -132,8 +141,15 @@ model Order {
   shippingCost   Float?
   paymentMethod  PaymentMethod @default(WEBPAY)
   paymentStatus  PaymentStatus @default(PENDING)
-  documentUrl    String?
+  documentUrl    String?       // Documento tributario (Factura/Boleta)
   cartItems      Json?
   
+  // --- CAMPOS B2B (Órdenes de Compra) ---
+  ocNumber       String?       // Número de la Orden de Compra corporativa
+  ocDocumentUrl  String?       // PDF de la OC subida por el cliente
+  
   user           User    @relation(fields: [userId], references: [id])
+
+  // Restricción: Una misma empresa (User) no puede subir dos veces el mismo número de OC
+  @@unique([userId, ocNumber])
 }

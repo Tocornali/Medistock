@@ -10,6 +10,7 @@ export const shippingSchema = z.object({
     message: "Región no válida",
   }),
   comuna: z.string().min(1, "La comuna es obligatoria"),
+  instrucciones: z.string().optional(),
 }).refine((data) => {
   if (!data.region || !data.comuna) return true;
   const region = CHILE_DATA.find(r => r.name === data.region);

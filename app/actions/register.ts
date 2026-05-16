@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { Role } from "@prisma/client"
+import { Role, Prisma } from "@prisma/client"
 import { registerSchema } from "@/lib/validations/auth"
 import { signIn } from "@/auth"
 
@@ -43,12 +43,12 @@ export async function registerUser(formData: FormData) {
     await prisma.user.create({
       data: {
         name,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         isActive: true, // Si se registran ellos mismos, entran activos
         role: role as Role,
         ...(accountType === "EMPRESA" ? {
-          rut,
+          rut: rut?.toUpperCase(),
           razonSocial,
           giro
         } : {})
@@ -58,6 +58,18 @@ export async function registerUser(formData: FormData) {
     return { success: true }
     
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        const target = (error.meta?.target as string[]) || [];
+        if (target.includes('email')) {
+          return { error: 'El correo electrónico ya está registrado. Por favor, inicia sesión.' };
+        }
+        if (target.includes('rut')) {
+          return { error: 'El RUT ya se encuentra asociado a otra cuenta.' };
+        }
+        return { error: 'Los datos ingresados ya existen en el sistema.' };
+      }
+    }
     console.error("Error al registrar usuario:", error)
     return { error: "Ocurrió un error al intentar crear el usuario." }
   }

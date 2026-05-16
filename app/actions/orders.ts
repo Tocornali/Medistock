@@ -6,7 +6,7 @@ import { webpayTransaction as tx } from '@/lib/transbank'
 import { getBaseUrl } from '@/lib/utils'
 import { auth } from '@/auth'
 import { calculatePrice } from '@/lib/prices'
-import { PaymentMethod, PaymentStatus, Role } from '@prisma/client'
+import { PaymentMethod, PaymentStatus, Role, OrderStatus } from '@prisma/client'
 
 export async function createOrder(payload: {
   cartItems: any[],
@@ -57,7 +57,7 @@ export async function createOrder(payload: {
         data: {
           userId: validUserId,
           total: secureTotal,
-          estado: payload.paymentMethod === PaymentMethod.INVOICE ? 'PENDIENTE_APROBACION' : 'PENDIENTE_PAGO',
+          estado: payload.paymentMethod === PaymentMethod.INVOICE ? OrderStatus.PENDING_OC_VALIDATION : OrderStatus.PENDING_OC_VALIDATION, // Temporal mapping, webpay also pending
           paymentStatus: payload.paymentMethod === PaymentMethod.INVOICE ? PaymentStatus.PENDING_APPROVAL : PaymentStatus.PENDING,
           deliveryMethod: payload.deliveryMethod,
           deliverySpeed: payload.deliverySpeed,
@@ -106,19 +106,31 @@ export async function createOrder(payload: {
         console.error("Error de Transbank:", error);
         throw new Error("No se pudo iniciar la transacción con Transbank");
       }
-    } else if (payload.paymentMethod === PaymentMethod.INVOICE) {
-      // Notificación al Ejecutivo de Cuentas (Simulada mediante log administrativo)
-      console.log(`[ADMIN NOTIFICATION] Nueva orden B2B pendiente de aprobación: ID ${result.id}. Cliente: ${userExists.name || userExists.rut}. OC: ${payload.documentUrl || 'No adjunta'}`);
+    } else if (payload.paymentMethod === PaymentMethod.PURCHASE_ORDER || payload.paymentMethod === PaymentMethod.INVOICE) {
+      // Notificación al Ejecutivo de Cuentas
+      console.log(`[ADMIN NOTIFICATION] Nueva orden B2B pendiente de aprobación: ID ${result.id}`);
       
       return { 
         success: true, 
         order: result, 
         type: 'INVOICE',
-        redirectUrl: `/checkout/exito?orden=${result.id}&method=invoice` 
+        redirectUrl: `/checkout/exito?orden=${result.id}&method=oc` 
+      };
+    } else if (payload.paymentMethod === PaymentMethod.TRANSFER) {
+      // Flujo de transferencia (Requiere aprobación manual)
+      return { 
+        success: true, 
+        order: result, 
+        type: 'TRANSFER',
+        redirectUrl: `/checkout/exito?orden=${result.id}&method=transfer` 
       };
     }
 
-    return { success: true, order: result };
+    return { 
+      success: true, 
+      order: result,
+      redirectUrl: `/checkout/exito?orden=${result.id}`
+    };
 
   } catch (error) {
     console.error("Error al crear la orden:", error);

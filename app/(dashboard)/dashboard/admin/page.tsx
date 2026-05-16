@@ -4,6 +4,9 @@ import DashboardCharts from './DashboardCharts'
 import DashboardFilters from './DashboardFilters'
 import { DollarSign, Clock, AlertTriangle, Users } from 'lucide-react'
 
+import { requireStrictAuth } from '@/lib/auth-validator'
+import { Role, PaymentMethod, OrderStatus } from '@prisma/client'
+
 // Interfaz para la tabla de últimas órdenes
 interface B2BOrder {
   id: string;
@@ -20,6 +23,10 @@ export default async function AdminDashboardPage({
 }: {
   searchParams: Promise<{ periodo?: string }>
 }) {
+  // 1. Aplicamos el validador estricto de sesión (JWT + Base de Datos)
+  // Requerimos que el usuario sea ADMIN o FINANCE
+  const user = await requireStrictAuth([Role.ADMIN, Role.FINANCE]);
+
   const resolvedParams = await searchParams;
   const periodo = resolvedParams.periodo || '30d';
 
@@ -42,19 +49,19 @@ export default async function AdminDashboardPage({
     ultimasOrdenesB2B,
     ventasParaGrafico
   ] = await Promise.all([
-    // 1. Suma de totalAmount de órdenes 'PAGADO'
+    // 1. Suma de totalAmount de órdenes 'PAID'
     prisma.order.aggregate({
       where: { 
-        estado: 'PAGADO',
+        estado: OrderStatus.PAID,
         createdAt: { gte: startDate }
       },
       _sum: { total: true }
     }),
     
-    // 2. Órdenes Pendientes (PENDIENTE_APROBACION o PENDIENTE_PAGO)
+    // 2. Órdenes Pendientes (PENDING_OC_VALIDATION)
     prisma.order.count({
       where: { 
-        estado: { in: ['PENDIENTE_PAGO', 'PENDIENTE_APROBACION'] },
+        estado: OrderStatus.PENDING_OC_VALIDATION,
         createdAt: { gte: startDate }
       }
     }),
@@ -72,8 +79,8 @@ export default async function AdminDashboardPage({
     // 5. Últimas 5 órdenes B2B pendientes de aprobación
     prisma.order.findMany({
       where: { 
-        paymentMethod: 'INVOICE',
-        estado: 'PENDIENTE_APROBACION'
+        paymentMethod: PaymentMethod.PURCHASE_ORDER,
+        estado: OrderStatus.PENDING_OC_VALIDATION
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -85,7 +92,7 @@ export default async function AdminDashboardPage({
     // 6. Órdenes para el gráfico
     prisma.order.findMany({
       where: { 
-        estado: 'PAGADO',
+        estado: OrderStatus.PAID,
         createdAt: { gte: startDate }
       },
       select: { 
@@ -111,7 +118,7 @@ export default async function AdminDashboardPage({
     }
     
     const dayData = chartDataMap.get(dateStr)!;
-    if (order.paymentMethod === 'INVOICE' || order.paymentMethod === 'TRANSFER') {
+    if (order.paymentMethod === PaymentMethod.PURCHASE_ORDER || order.paymentMethod === PaymentMethod.TRANSFER) {
       dayData.b2b += order.total;
     } else {
       dayData.b2c += order.total;

@@ -7,6 +7,7 @@ export const authConfig = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 12 * 60 * 60, // 12 horas de TTL estricto
   },
   callbacks: {
     jwt({ token, user }) {

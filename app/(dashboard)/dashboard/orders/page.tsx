@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrencyCLP } from "@/lib/utils";
 import { ShoppingCart, Search, FileText, CheckCircle, Clock } from "lucide-react";
+import { OrderStatus } from "@prisma/client";
 
 export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
@@ -52,11 +53,11 @@ export default async function OrdersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                      order.estado === 'PAGADO' 
+                      order.estado === OrderStatus.PAID 
                         ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
                         : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
                     }`}>
-                      {order.estado === 'PAGADO' ? <CheckCircle className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
+                      {order.estado === OrderStatus.PAID ? <CheckCircle className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                       {order.estado}
                     </span>
                   </td>
