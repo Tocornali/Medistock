@@ -1,21 +1,22 @@
 import { prisma } from "@/lib/prisma"
 import { formatCurrencyCLP } from "@/lib/utils"
 import { DollarSign, Clock, Building2, AlertTriangle } from "lucide-react"
+import { OrderStatus } from "@prisma/client"
 
 export default async function SummaryCards() {
   // 1. Ventas Totales
   const ventasResult = await prisma.order.aggregate({
     _sum: { total: true },
     where: { 
-      estado: { in: ['PAGADO', 'COMPLETED', 'AUTHORIZATION_OK'] } 
+      estado: { in: [OrderStatus.PAID, OrderStatus.INVOICED] } 
     }
   })
-  const ventasTotales = ventasResult._sum.total || 0
+  const ventasTotales = ventasResult._sum?.total || 0
 
   // 2. Órdenes Pendientes
   const ordenesPendientes = await prisma.order.count({
     where: {
-      estado: { in: ['ENVIADO', 'PROCESANDO', 'PENDIENTE_PAGO', 'PENDING', 'PENDIENTE_APROBACION'] }
+      estado: { in: [OrderStatus.PENDING_OC_VALIDATION, OrderStatus.OC_APPROVED, OrderStatus.SHIPPED] }
     }
   })
 

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { formatCurrencyCLP } from "@/lib/utils"
+import { OrderStatus } from "@prisma/client"
 
 export default async function RecentOrdersTable() {
   // 5. Últimas 5 transacciones
@@ -40,7 +41,7 @@ export default async function RecentOrdersTable() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-bold transition-colors ${
-                      ['PAGADO', 'COMPLETED', 'AUTHORIZATION_OK'].includes(order.estado) 
+                      ([OrderStatus.PAID, OrderStatus.INVOICED, OrderStatus.SHIPPED, OrderStatus.OC_APPROVED] as OrderStatus[]).includes(order.estado) 
                         ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
                         : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
                     }`}>
