@@ -91,6 +91,10 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost
 
   const handleNextStep = () => {
+    if (!session) {
+      router.push('/login?callbackUrl=/checkout')
+      return
+    }
     if (currentStep < 3) {
       setCurrentStep((prev) => (prev + 1) as 1 | 2 | 3)
     }
@@ -103,6 +107,10 @@ export default function CheckoutPage() {
   }
 
   const handleConfirmOrder = async () => {
+    if (!session) {
+      router.push('/login?callbackUrl=/checkout')
+      return
+    }
     let finalAddress = ''
 
     if (deliveryMethod === 'DOMICILIO') {
@@ -128,7 +136,7 @@ export default function CheckoutPage() {
 
     const payload = {
       cartItems: items,
-      userId: session?.user?.id || 'guest',
+      userId: session.user.id,
       deliveryMethod,
       deliverySpeed: deliveryMethod === 'RETIRO' ? 'NORMAL' : deliverySpeed,
       address: finalAddress,

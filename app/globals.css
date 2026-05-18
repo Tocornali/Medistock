@@ -6,6 +6,17 @@
   --color-brand-primary: #20B2AA;
   --color-brand-dark: #1A1C1E;
   --color-brand-light: #F8FAFC;
+
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 @layer base {

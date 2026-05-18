@@ -118,6 +118,12 @@ export default function CarritoPage() {
   const montoIva = (subtotal + shippingCost) * 0.19
 
   const handleNextStep = async () => {
+    // Validación de seguridad: si no hay sesión activa, redirigir al login antes de pasar al checkout
+    if (!session) {
+      router.push('/login?callbackUrl=/carrito')
+      return
+    }
+
     if (currentStep === 2) {
       // Si es retiro en tienda, solo validamos nombre y teléfono.
       // Si es domicilio, validamos todo (undefined = todo).
@@ -136,12 +142,16 @@ export default function CarritoPage() {
   }
 
   const handleConfirmOrder = async () => {
+    if (!session) {
+      router.push('/login?callbackUrl=/carrito')
+      return
+    }
     setIsProcessing(true)
     const shippingData = watch();
     try {
       const result = await createOrder({
         cartItems: items,
-        userId: session?.user?.id || 'guest',
+        userId: session.user.id,
         deliveryMethod,
         deliverySpeed: deliveryMethod === 'RETIRO' ? 'NORMAL' : deliverySpeed,
         address: deliveryMethod === 'DOMICILIO' 

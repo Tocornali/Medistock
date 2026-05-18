@@ -4,6 +4,7 @@ import SearchBar from '@/components/SearchBar'
 import FilterSidebar from '@/components/FilterSidebar'
 import ProductList from '@/components/ProductList'
 import ProductGridSkeleton from '@/components/skeletons/ProductGridSkeleton'
+import FeaturedSection from '@/components/FeaturedSection'
 import { auth } from '@/auth'
 
 const prisma = new PrismaClient()
@@ -66,6 +67,11 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
 
         {/* Barra de Búsqueda */}
         <SearchBar />
+
+        {/* Sección Destacada (Visible solo cuando no hay filtros de búsqueda o categoría activos) */}
+        {!resolvedSearchParams.q && !resolvedSearchParams.category && (
+          <FeaturedSection />
+        )}
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar de Filtros Avanzados */}
