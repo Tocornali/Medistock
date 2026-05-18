@@ -1,4 +1,4 @@
-import { PrismaClient, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { PrismaClient, PaymentMethod, PaymentStatus, OrderStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -26,7 +26,7 @@ async function main() {
       orders.push({
         userId,
         total: Math.floor(Math.random() * 80000) + 15000, // Entre 15k y 95k
-        estado: 'PAGADO',
+        estado: OrderStatus.PAID,
         paymentStatus: PaymentStatus.PAID,
         paymentMethod: PaymentMethod.WEBPAY,
         createdAt: orderDate,
@@ -44,7 +44,7 @@ async function main() {
       orders.push({
         userId,
         total: Math.floor(Math.random() * 1500000) + 300000, // Entre 300k y 1.8M
-        estado: 'PAGADO',
+        estado: OrderStatus.PAID,
         paymentStatus: PaymentStatus.PAID,
         paymentMethod: PaymentMethod.INVOICE,
         createdAt: orderDate,
@@ -58,7 +58,7 @@ async function main() {
     orders.push({
       userId,
       total: Math.floor(Math.random() * 2000000) + 500000,
-      estado: 'PENDIENTE_APROBACION',
+      estado: OrderStatus.PENDING_OC_VALIDATION,
       paymentStatus: PaymentStatus.PENDING_APPROVAL,
       paymentMethod: PaymentMethod.INVOICE,
       createdAt: new Date(),
